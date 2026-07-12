@@ -12,6 +12,8 @@ interface ProductFormProps {
   vendorsList: Vendor[];
   onSubmit: (formData: any) => void;
   onCancel: () => void;
+  customSections?: string[];
+  customOccasions?: string[];
 }
 
 export default function ProductForm({
@@ -20,6 +22,8 @@ export default function ProductForm({
   vendorsList,
   onSubmit,
   onCancel,
+  customSections,
+  customOccasions,
 }: ProductFormProps) {
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -29,8 +33,8 @@ export default function ProductForm({
   const [discountedPrice, setDiscountedPrice] = useState('');
   const [qty, setQty] = useState('0');
   const [sku, setSku] = useState('');
-  const [occasion, setOccasion] = useState('');
-  const [landingSection, setLandingSection] = useState('NONE');
+  const [occasions, setOccasions] = useState<string[]>([]);
+  const [landingSections, setLandingSections] = useState<string[]>([]);
   const [featuredType, setFeaturedType] = useState('TOP_PICKS');
   const [images, setImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
@@ -48,8 +52,18 @@ export default function ProductForm({
       setDiscountedPrice(product.discounted_price ? product.discounted_price.toString() : '');
       setQty(product.quantity_in_stock.toString());
       setSku(product.sku || '');
-      setOccasion(product.occasion || '');
-      setLandingSection(product.landing_section || 'NONE');
+      const initialOccasions = Array.isArray(product.occasions)
+        ? product.occasions
+        : product.occasion
+          ? [product.occasion]
+          : [];
+      setOccasions(initialOccasions);
+      const initialSections = Array.isArray(product.landing_sections)
+        ? product.landing_sections
+        : product.landing_section && product.landing_section !== 'NONE'
+          ? [product.landing_section]
+          : [];
+      setLandingSections(initialSections);
       setFeaturedType(product.featured_type || 'TOP_PICKS');
       setImages(product.images || []);
       setVariants(product.variants || []);
@@ -64,8 +78,8 @@ export default function ProductForm({
       setDiscountedPrice('');
       setQty('10');
       setSku('');
-      setOccasion('');
-      setLandingSection('NONE');
+      setOccasions([]);
+      setLandingSections([]);
       setFeaturedType('TOP_PICKS');
       setImages(['https://images.unsplash.com/photo-1594736797933-d0501ba21155?w=500&auto=format&fit=crop&q=80']); // prefill a placeholder product image
       setVariants([]);
@@ -98,8 +112,10 @@ export default function ProductForm({
       discounted_price: discountedPrice ? parseFloat(discountedPrice) : null,
       quantity_in_stock: parseInt(qty),
       sku: sku.trim() || null,
-      occasion: occasion.trim() || null,
-      landing_section: landingSection,
+      occasions: occasions,
+      occasion: occasions[0] || null,
+      landing_sections: landingSections,
+      landing_section: landingSections[0] || 'NONE',
       featured_type: featuredType,
       images,
       variants,
@@ -246,16 +262,28 @@ export default function ProductForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Target Occasion</label>
-          <div className="relative">
-            <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
-            <input
-              type="text"
-              value={occasion}
-              onChange={e => setOccasion(e.target.value)}
-              placeholder="e.g. Bridal Wear, Office Formal..."
-              className="form-input pl-10"
-            />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Target Occasions</label>
+          <div className="grid grid-cols-2 gap-2 p-3 rounded-xl border border-slate-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-950/60 font-semibold max-h-[140px] overflow-y-auto">
+            {(customOccasions || ['Bridal Wear', 'Party Wear', 'Office Formal', 'Festive Wear']).map(occ => {
+              const isChecked = occasions.includes(occ);
+              return (
+                <label key={occ} className="flex items-center gap-2 text-xs text-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setOccasions([...occasions, occ]);
+                      } else {
+                        setOccasions(occasions.filter(o => o !== occ));
+                      }
+                    }}
+                    className="w-3.5 h-3.5 rounded border-slate-300 dark:border-zinc-850 text-indigo-650 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <span>{occ}</span>
+                </label>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -263,20 +291,28 @@ export default function ProductForm({
       {/* Landing Section and Featured Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Landing Section Placement</label>
-          <div className="relative">
-            <LayoutDashboard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none" />
-            <select
-              value={landingSection}
-              onChange={e => setLandingSection(e.target.value)}
-              className="form-input pl-10 cursor-pointer"
-            >
-              <option value="NONE">None (Catalog Only)</option>
-              <option value="HERO">Hero Banner Section</option>
-              <option value="TRENDING">Trending Section</option>
-              <option value="NEW_ARRIVALS">New Arrivals Grid</option>
-              <option value="DISCOUNTS">Discounts Section</option>
-            </select>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Landing Section Placements</label>
+          <div className="grid grid-cols-2 gap-2 p-3 rounded-xl border border-slate-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-950/60 font-semibold max-h-[140px] overflow-y-auto">
+            {(customSections || ['HERO', 'TRENDING', 'NEW_ARRIVALS', 'DISCOUNTS']).map(sec => {
+              const isChecked = landingSections.includes(sec);
+              return (
+                <label key={sec} className="flex items-center gap-2 text-xs text-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={e => {
+                      if (e.target.checked) {
+                         setLandingSections([...landingSections, sec]);
+                      } else {
+                         setLandingSections(landingSections.filter(s => s !== sec));
+                      }
+                    }}
+                    className="w-3.5 h-3.5 rounded border-slate-300 dark:border-zinc-850 text-indigo-650 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <span>{sec.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</span>
+                </label>
+              );
+            })}
           </div>
         </div>
 

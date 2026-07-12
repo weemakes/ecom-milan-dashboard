@@ -13,6 +13,7 @@ import ProductTable from '@/components/products/ProductTable';
 import ProductForm from '@/components/products/ProductForm';
 import Modal from '@/components/ui/Modal';
 import Toast, { ToastType } from '@/components/ui/Toast';
+import CampaignManager from '@/components/campaigns/CampaignManager';
 import { Plus, RefreshCcw } from 'lucide-react';
 import { 
   Vendor, 
@@ -53,6 +54,8 @@ export default function AppMain() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [customSections, setCustomSections] = useState<string[]>([]);
+  const [customOccasions, setCustomOccasions] = useState<string[]>([]);
 
   // Loading States (Simulate local query latency)
   const [loadingVendors, setLoadingVendors] = useState(false);
@@ -107,6 +110,21 @@ export default function AppMain() {
     if (!localStorage.getItem('products')) {
       localStorage.setItem('products', JSON.stringify(SEED_PRODUCTS));
     }
+
+    // 2.5 Local Campaign Builder Datasets Seeding
+    if (!localStorage.getItem('custom_sections')) {
+      const initialSections = ['HERO', 'TRENDING', 'NEW_ARRIVALS', 'DISCOUNTS'];
+      localStorage.setItem('custom_sections', JSON.stringify(initialSections));
+    }
+    if (!localStorage.getItem('custom_occasions')) {
+      const initialOccasions = ['Bridal Wear', 'Party Wear', 'Office Formal', 'Festive Wear'];
+      localStorage.setItem('custom_occasions', JSON.stringify(initialOccasions));
+    }
+
+    const storedSections = localStorage.getItem('custom_sections');
+    if (storedSections) setCustomSections(JSON.parse(storedSections));
+    const storedOccasions = localStorage.getItem('custom_occasions');
+    if (storedOccasions) setCustomOccasions(JSON.parse(storedOccasions));
 
     // 3. Authenticate Session
     const savedUser = localStorage.getItem('userSession');
@@ -705,6 +723,28 @@ export default function AppMain() {
               </div>
             )}
 
+            {/* TAB: CAMPAIGNS & OCCASIONS */}
+            {currentTab === 'campaigns' && (
+              <CampaignManager
+                products={products}
+                onUpdateProducts={(updatedProducts) => {
+                  setProducts(updatedProducts);
+                  localStorage.setItem('products', JSON.stringify(updatedProducts));
+                }}
+                customSections={customSections}
+                onUpdateSections={(updatedSections) => {
+                  setCustomSections(updatedSections);
+                  localStorage.setItem('custom_sections', JSON.stringify(updatedSections));
+                }}
+                customOccasions={customOccasions}
+                onUpdateOccasions={(updatedOccasions) => {
+                  setCustomOccasions(updatedOccasions);
+                  localStorage.setItem('custom_occasions', JSON.stringify(updatedOccasions));
+                }}
+                categoriesList={categories}
+              />
+            )}
+
           </div>
         </main>
       </div>
@@ -773,6 +813,8 @@ export default function AppMain() {
             setProductModalOpen(false);
             setEditingProduct(null);
           }}
+          customSections={customSections}
+          customOccasions={customOccasions}
         />
       </Modal>
 

@@ -188,11 +188,23 @@ export default function ProductTable({
                         ) : (
                           <span className="font-bold text-foreground">₹{product.price}</span>
                         )}
-                        {product.landing_section && product.landing_section !== 'NONE' && (
-                          <span className="text-[9px] text-zinc-400 font-medium mt-0.5 italic">
-                            Section: {product.landing_section}
-                          </span>
-                        )}
+                        {(() => {
+                          const secs = Array.isArray(product.landing_sections)
+                            ? product.landing_sections
+                            : product.landing_section && product.landing_section !== 'NONE'
+                              ? [product.landing_section]
+                              : [];
+                          if (secs.length === 0) return null;
+                          return (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {secs.map((sec: string) => (
+                                <span key={sec} className="inline-flex items-center text-[9px] text-zinc-400 font-bold bg-slate-100 dark:bg-zinc-900 border border-slate-200/40 dark:border-zinc-800/40 px-1.5 py-0.5 rounded uppercase">
+                                  {sec}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </td>
 

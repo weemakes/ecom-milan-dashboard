@@ -36,7 +36,9 @@ export interface ProductDetail {
   quantity_in_stock: number;
   sku?: string;
   occasion?: string;
+  occasions?: string[];
   landing_section: 'HERO' | 'TRENDING' | 'NEW_ARRIVALS' | 'DISCOUNTS' | 'NONE';
+  landing_sections?: string[];
   featured_type: 'TOP_PICKS' | 'BEST_SELLERS' | 'SPECIAL_DEALS';
   images: string[];
   variants: any[];
