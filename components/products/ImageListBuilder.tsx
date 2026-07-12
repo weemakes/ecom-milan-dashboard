@@ -87,7 +87,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 select-none">
+    <div className="flex flex-col gap-4 p-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-black/15 backdrop-blur-sm select-none">
       
       {/* Title */}
       <div className="flex items-center gap-2 pb-1 border-b border-zinc-200 dark:border-zinc-800/80">
@@ -96,7 +96,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
       </div>
 
       {/* Tabs Selector */}
-      <div className="flex border-b border-zinc-200 dark:border-zinc-800/80 p-0.5 bg-zinc-100/50 dark:bg-zinc-900/50 rounded-lg w-fit">
+      <div className="flex border-b border-zinc-200/30 dark:border-zinc-800/30 p-0.5 bg-white/10 dark:bg-black/10 rounded-lg w-fit">
         <button
           type="button"
           onClick={() => setActiveTab('link')}
@@ -131,7 +131,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
             onChange={e => setUrlInput(e.target.value)}
             placeholder="Paste product image URL(s). Separate multiple links with commas (,) or newlines..."
             rows={2}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 text-xs py-2 resize-none font-medium"
+            className="form-input text-xs py-2 resize-none font-medium"
           />
           <button
             type="button"
@@ -157,7 +157,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
           
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="h-28 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-background/50 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors group"
+            className="h-28 rounded-xl border-2 border-dashed border-zinc-300/60 dark:border-zinc-800/60 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white/10 dark:bg-black/10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-200 group"
           >
             {uploading ? (
               <>
@@ -185,7 +185,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
             {images.map((img, idx) => (
               <div 
                 key={idx} 
-                className="group relative h-20 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-background overflow-hidden flex items-center justify-center shadow-sm"
+                className="group relative h-20 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white/10 dark:bg-black/10 overflow-hidden flex items-center justify-center shadow-sm hover:scale-[1.02] transition-all duration-200"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

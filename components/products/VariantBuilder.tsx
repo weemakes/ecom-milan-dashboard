@@ -43,7 +43,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
   };
 
   return (
-    <div className="flex flex-col gap-3.5 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 select-none">
+    <div className="flex flex-col gap-3.5 p-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-black/15 backdrop-blur-sm select-none">
       <div className="flex items-center gap-2 pb-1 border-b border-zinc-200 dark:border-zinc-800/80">
         <Sliders className="w-4 h-4 text-indigo-500" />
         <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Variants Manager</h4>
@@ -58,7 +58,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
             value={color}
             onChange={e => setColor(e.target.value)}
             placeholder="e.g. Red, Crimson"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            className="form-input text-xs py-1.5"
           />
         </div>
 
@@ -69,7 +69,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
             value={size}
             onChange={e => setSize(e.target.value)}
             placeholder="e.g. M, L, XL, 256GB"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            className="form-input text-xs py-1.5"
           />
         </div>
 
@@ -81,7 +81,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
             onChange={e => setPrice(e.target.value)}
             placeholder="Override price"
             min="0"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            className="form-input text-xs py-1.5"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
             onChange={e => setStock(e.target.value)}
             placeholder="Override stock"
             min="0"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            className="form-input text-xs py-1.5"
           />
         </div>
 
@@ -110,7 +110,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
       {variants.length === 0 ? (
         <span className="text-[11px] text-zinc-400 italic text-center py-2">No variants created. Product defaults will apply.</span>
       ) : (
-        <div className="w-full overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800 bg-background mt-1">
+        <div className="w-full overflow-hidden rounded-lg border border-zinc-200/50 dark:border-zinc-800/50 bg-white/10 dark:bg-black/10 mt-1">
           <table className="w-full text-left border-collapse text-[11px]">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-400 font-bold bg-zinc-100/30 dark:bg-zinc-900/30">

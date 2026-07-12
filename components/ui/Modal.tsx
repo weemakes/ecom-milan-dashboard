@@ -46,18 +46,18 @@ export default function Modal({
 
   if (position === 'right') {
     return (
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+      <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/40 backdrop-blur-md transition-opacity duration-300">
         {/* Backdrop click */}
         <div className="absolute inset-0 -z-10" onClick={onClose} />
         
         <div className={`w-full ${sizeClasses[size] || 'max-w-lg'} h-full flex flex-col bg-background border-l border-zinc-200 dark:border-zinc-800 shadow-2xl animate-slide-in-right`}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-            <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+          <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-950/50">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100 tracking-tight">{title}</h3>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-foreground transition-colors"
+              className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-900 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-all duration-200 cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4.5 h-4.5" />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
@@ -69,18 +69,18 @@ export default function Modal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-fade-in">
       {/* Backdrop click */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
       
-      <div className={`w-full ${sizeClasses[size]} rounded-xl glass-panel shadow-2xl overflow-hidden animate-fade-in`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+      <div className={`w-full ${sizeClasses[size]} rounded-2xl bg-white dark:bg-zinc-950 border border-slate-200/80 dark:border-zinc-800/80 shadow-2xl overflow-hidden animate-fade-in`}>
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-950/50">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100 tracking-tight">{title}</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-foreground transition-colors"
+            className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-900 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-all duration-200 cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4.5 h-4.5" />
           </button>
         </div>
         <div className="p-6 max-h-[85vh] overflow-y-auto">

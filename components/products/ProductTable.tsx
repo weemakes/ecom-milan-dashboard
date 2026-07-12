@@ -112,6 +112,7 @@ export default function ProductTable({
               <th className="py-3 px-4">Product Info</th>
               <th className="py-3 px-4">Categories & Vendor</th>
               <th className="py-3 px-4">Price details</th>
+              <th className="py-3 px-4">Discount</th>
               <th className="py-3 px-4">Inventory</th>
               <th className="py-3 px-4">Toggles</th>
               <th className="py-3 px-4 text-right">Actions</th>
@@ -120,13 +121,13 @@ export default function ProductTable({
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-sm">
             {loading ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-zinc-500">
+                <td colSpan={7} className="py-12 text-center text-zinc-500">
                   Loading catalog products list...
                 </td>
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-zinc-500">
+                <td colSpan={7} className="py-12 text-center text-zinc-500">
                   No products found matching filters.
                 </td>
               </tr>
@@ -183,11 +184,6 @@ export default function ProductTable({
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-foreground">₹{product.discounted_price}</span>
                             <span className="text-xs text-zinc-500 line-through">₹{product.price}</span>
-                            {discountPercent > 0 && (
-                              <span className="text-[9px] font-black text-emerald-500 bg-emerald-500/10 px-1 rounded">
-                                {discountPercent}% OFF
-                              </span>
-                            )}
                           </div>
                         ) : (
                           <span className="font-bold text-foreground">₹{product.price}</span>
@@ -198,6 +194,20 @@ export default function ProductTable({
                           </span>
                         )}
                       </div>
+                    </td>
+
+                    {/* Discount */}
+                    <td className="py-3 px-4">
+                      {discountPercent > 0 ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <Tag className="w-3.5 h-3.5 text-emerald-500" />
+                          {discountPercent}% OFF
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800/80 text-zinc-400 border border-zinc-200/50 dark:border-zinc-800/50">
+                          —
+                        </span>
+                      )}
                     </td>
 
                     {/* Stock & variants count */}

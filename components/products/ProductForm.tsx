@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ProductDetail, ProductCategory, Vendor } from '@/lib/seedData';
 import VariantBuilder from './VariantBuilder';
 import ImageListBuilder from './ImageListBuilder';
+import { Package, Layers, Shield, Tag, Box, Barcode, Calendar, LayoutDashboard, Star, FileText } from 'lucide-react';
 
 interface ProductFormProps {
   product?: ProductDetail | null;
@@ -119,48 +120,57 @@ export default function ProductForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Name */}
         <div className="flex flex-col gap-1.5 col-span-1 md:col-span-2">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="e.g. Silk Banarasi Saree, Leather Jacket..."
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-            required
-          />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Product Name *</label>
+          <div className="relative">
+            <Package className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="e.g. Silk Banarasi Saree, Leather Jacket..."
+              className="form-input pl-10"
+              required
+            />
+          </div>
         </div>
       </div>
 
       {/* Category and Vendor */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Category *</label>
-          <select
-            value={categoryId}
-            onChange={e => setCategoryId(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
-            required
-          >
-            <option value="" disabled>Select category</option>
-            {categoriesList.map(c => (
-              <option key={c.id} value={c.id}>{c.category_name}</option>
-            ))}
-          </select>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Product Category *</label>
+          <div className="relative">
+            <Layers className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+            <select
+              value={categoryId}
+              onChange={e => setCategoryId(e.target.value)}
+              className="form-input pl-10 cursor-pointer"
+              required
+            >
+              <option value="" disabled>Select category</option>
+              {categoriesList.map(c => (
+                <option key={c.id} value={c.id}>{c.category_name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Merchant Ownership *</label>
-          <select
-            value={vendorId}
-            onChange={e => setVendorId(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
-            required
-          >
-            <option value="" disabled>Select merchant</option>
-            {vendorsList.map(v => (
-              <option key={v.id} value={v.id}>{v.name}</option>
-            ))}
-          </select>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Merchant Ownership *</label>
+          <div className="relative">
+            <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+            <select
+              value={vendorId}
+              onChange={e => setVendorId(e.target.value)}
+              className="form-input pl-10 cursor-pointer"
+              required
+            >
+              <option value="" disabled>Select merchant</option>
+              {vendorsList.map(v => (
+                <option key={v.id} value={v.id}>{v.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -168,114 +178,138 @@ export default function ProductForm({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Original Price */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Original Price (₹) *</label>
-          <input
-            type="number"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
-            placeholder="e.g. 2999"
-            min="0"
-            step="0.01"
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-            required
-          />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Original Price *</label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 dark:text-zinc-500">₹</span>
+            <input
+              type="number"
+              value={price}
+              onChange={e => setPrice(e.target.value)}
+              placeholder="e.g. 2999"
+              min="0"
+              step="0.01"
+              className="form-input pl-8"
+              required
+            />
+          </div>
         </div>
 
         {/* Discount Price */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Discounted Price (₹)</label>
-          <input
-            type="number"
-            value={discountedPrice}
-            onChange={e => setDiscountedPrice(e.target.value)}
-            placeholder="e.g. 2499"
-            min="0"
-            step="0.01"
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-          />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Discounted Price</label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 dark:text-zinc-500">₹</span>
+            <input
+              type="number"
+              value={discountedPrice}
+              onChange={e => setDiscountedPrice(e.target.value)}
+              placeholder="e.g. 2499"
+              min="0"
+              step="0.01"
+              className="form-input pl-8"
+            />
+          </div>
         </div>
 
         {/* Stock Qty */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Initial Stock Quantity *</label>
-          <input
-            type="number"
-            value={qty}
-            onChange={e => setQty(e.target.value)}
-            placeholder="e.g. 50"
-            min="0"
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-            required
-          />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Initial Stock *</label>
+          <div className="relative">
+            <Box className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
+            <input
+              type="number"
+              value={qty}
+              onChange={e => setQty(e.target.value)}
+              placeholder="e.g. 50"
+              min="0"
+              className="form-input pl-10"
+              required
+            />
+          </div>
         </div>
       </div>
 
       {/* SKU and Occasion */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">SKU Code (Unique)</label>
-          <input
-            type="text"
-            value={sku}
-            onChange={e => setSku(e.target.value)}
-            placeholder="e.g. MLN-SAREE-RED-001"
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 font-mono"
-          />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">SKU Code (Unique)</label>
+          <div className="relative">
+            <Barcode className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
+            <input
+              type="text"
+              value={sku}
+              onChange={e => setSku(e.target.value)}
+              placeholder="e.g. MLN-SAREE-RED-001"
+              className="form-input pl-10 font-mono"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Target Occasion</label>
-          <input
-            type="text"
-            value={occasion}
-            onChange={e => setOccasion(e.target.value)}
-            placeholder="e.g. Bridal Wear, Office Formal..."
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-          />
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Target Occasion</label>
+          <div className="relative">
+            <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
+            <input
+              type="text"
+              value={occasion}
+              onChange={e => setOccasion(e.target.value)}
+              placeholder="e.g. Bridal Wear, Office Formal..."
+              className="form-input pl-10"
+            />
+          </div>
         </div>
       </div>
 
       {/* Landing Section and Featured Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Landing Page Section Placement</label>
-          <select
-            value={landingSection}
-            onChange={e => setLandingSection(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
-          >
-            <option value="NONE">None (Catalog Only)</option>
-            <option value="HERO">Hero Banner Section</option>
-            <option value="TRENDING">Trending Section</option>
-            <option value="NEW_ARRIVALS">New Arrivals Grid</option>
-            <option value="DISCOUNTS">Discounts Section</option>
-          </select>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Landing Section Placement</label>
+          <div className="relative">
+            <LayoutDashboard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+            <select
+              value={landingSection}
+              onChange={e => setLandingSection(e.target.value)}
+              className="form-input pl-10 cursor-pointer"
+            >
+              <option value="NONE">None (Catalog Only)</option>
+              <option value="HERO">Hero Banner Section</option>
+              <option value="TRENDING">Trending Section</option>
+              <option value="NEW_ARRIVALS">New Arrivals Grid</option>
+              <option value="DISCOUNTS">Discounts Section</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Featured Group Category</label>
-          <select
-            value={featuredType}
-            onChange={e => setFeaturedType(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
-          >
-            <option value="TOP_PICKS">Top Picks</option>
-            <option value="BEST_SELLERS">Best Sellers</option>
-            <option value="SPECIAL_DEALS">Special Deals</option>
-          </select>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Featured Group Category</label>
+          <div className="relative">
+            <Star className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+            <select
+              value={featuredType}
+              onChange={e => setFeaturedType(e.target.value)}
+              className="form-input pl-10 cursor-pointer"
+            >
+              <option value="TOP_PICKS">Top Picks</option>
+              <option value="BEST_SELLERS">Best Sellers</option>
+              <option value="SPECIAL_DEALS">Special Deals</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Description */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Description</label>
-        <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          placeholder="Enter rich details about fabrics, fits, dimensions, and specifications..."
-          rows={3}
-          className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-2 resize-none"
-        />
+        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500/80 dark:text-zinc-400">Product Description</label>
+        <div className="relative">
+          <FileText className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400 dark:text-zinc-500" />
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Enter rich details about fabrics, fits, dimensions, and specifications..."
+            rows={3}
+            className="form-input pl-10 py-3.5 resize-none"
+          />
+        </div>
       </div>
 
       {/* Image URL collection */}
@@ -287,7 +321,7 @@ export default function ProductForm({
       {/* Status Badges */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Active Toggle */}
-        <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200/60 dark:border-zinc-800/60 bg-slate-500/5 dark:bg-zinc-400/5 backdrop-blur-sm shadow-sm transition-all duration-300 hover:border-indigo-500/30 hover:bg-slate-500/10 dark:hover:bg-zinc-400/10 select-none">
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-foreground">List Product as Active</span>
             <span className="text-xs text-zinc-400">Available to customers in searches and categories</span>
@@ -295,12 +329,12 @@ export default function ProductForm({
           <button
             type="button"
             onClick={() => setIsActive(!isActive)}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              isActive ? 'bg-indigo-600' : 'bg-zinc-300 dark:bg-zinc-700'
+            className={`relative inline-flex h-6.5 w-11.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none hover:shadow-md active:scale-95 ${
+              isActive ? 'bg-gradient-to-r from-indigo-600 to-violet-600' : 'bg-slate-200 dark:bg-zinc-800'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+              className={`pointer-events-none inline-block h-5.5 w-5.5 transform rounded-full bg-white shadow-lg ring-0 transition duration-300 ease-in-out ${
                 isActive ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
@@ -308,7 +342,7 @@ export default function ProductForm({
         </div>
 
         {/* Featured Spot Toggle */}
-        <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200/60 dark:border-zinc-800/60 bg-slate-500/5 dark:bg-zinc-400/5 backdrop-blur-sm shadow-sm transition-all duration-300 hover:border-indigo-500/30 hover:bg-slate-500/10 dark:hover:bg-zinc-400/10 select-none">
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-foreground">Featured Spotlight Badge</span>
             <span className="text-xs text-zinc-400">Highlight in featured groups and sliders</span>
@@ -316,12 +350,12 @@ export default function ProductForm({
           <button
             type="button"
             onClick={() => setIsFeatured(!isFeatured)}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              isFeatured ? 'bg-indigo-600' : 'bg-zinc-300 dark:bg-zinc-700'
+            className={`relative inline-flex h-6.5 w-11.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none hover:shadow-md active:scale-95 ${
+              isFeatured ? 'bg-gradient-to-r from-indigo-600 to-violet-600' : 'bg-slate-200 dark:bg-zinc-800'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+              className={`pointer-events-none inline-block h-5.5 w-5.5 transform rounded-full bg-white shadow-lg ring-0 transition duration-300 ease-in-out ${
                 isFeatured ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
@@ -330,17 +364,17 @@ export default function ProductForm({
       </div>
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800 pt-4 mt-2">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 dark:border-zinc-900 pt-4 mt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm font-semibold transition-colors cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/80 text-slate-700 dark:text-slate-300 text-sm font-medium transition-all duration-200 cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md shadow-indigo-600/10 transition-colors cursor-pointer"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:scale-[0.98] text-white text-sm font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/35 transition-all duration-200 cursor-pointer"
         >
           {product ? 'Save Updates' : 'Create Product'}
         </button>
