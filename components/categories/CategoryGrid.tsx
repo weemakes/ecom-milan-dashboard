@@ -13,6 +13,7 @@ interface CategoryGridProps {
   setSearchQuery: (query: string) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
+  onSelect?: (id: string) => void;
 }
 
 export default function CategoryGrid({
@@ -24,6 +25,7 @@ export default function CategoryGrid({
   setSearchQuery,
   statusFilter,
   setStatusFilter,
+  onSelect,
 }: CategoryGridProps) {
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
@@ -67,7 +69,8 @@ export default function CategoryGrid({
           {categories.map((category) => (
             <div 
               key={category.id} 
-              className={`premium-card overflow-hidden flex flex-col justify-between ${
+              onClick={() => onSelect && onSelect(category.id)}
+              className={`premium-card overflow-hidden flex flex-col justify-between cursor-pointer hover:border-indigo-500/40 hover:shadow-lg transition-all ${
                 category.is_active ? '' : 'border-red-500/20 opacity-75'
               }`}
             >
@@ -130,13 +133,13 @@ export default function CategoryGrid({
               {/* Action Buttons */}
               <div className="px-5 py-3.5 border-t border-zinc-200 dark:border-zinc-800/80 bg-zinc-100/30 dark:bg-zinc-900/30 flex items-center justify-end gap-2">
                 <button
-                  onClick={() => onEdit(category)}
+                  onClick={(e) => { e.stopPropagation(); onEdit(category); }}
                   className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-background"
                 >
                   <Edit2 className="w-3.5 h-3.5" /> Edit
                 </button>
                 <button
-                  onClick={() => onDelete(category.id)}
+                  onClick={(e) => { e.stopPropagation(); onDelete(category.id); }}
                   className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:border-red-500/30 text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-background"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Delete

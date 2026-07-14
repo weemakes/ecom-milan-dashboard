@@ -25,17 +25,62 @@ export default function ProductForm({
   const [vendorId, setVendorId] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [discount, setDiscount] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState('');
   const [qty, setQty] = useState('0');
   const [sku, setSku] = useState('');
-  const [occasion, setOccasion] = useState('');
-  const [landingSection, setLandingSection] = useState('NONE');
-  const [featuredType, setFeaturedType] = useState('TOP_PICKS');
   const [images, setImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [error, setError] = useState('');
+
+  const handlePriceChange = (val: string) => {
+    setPrice(val);
+    if (val && discount) {
+      const p = parseFloat(val);
+      const d = parseFloat(discount);
+      if (!isNaN(p) && !isNaN(d)) {
+        const finalDisc = Math.round(p - (p * d) / 100);
+        setDiscountedPrice(finalDisc.toString());
+      }
+    } else if (val && discountedPrice) {
+      const p = parseFloat(val);
+      const dp = parseFloat(discountedPrice);
+      if (!isNaN(p) && !isNaN(dp) && p > 0) {
+        const pct = Math.round(((p - dp) / p) * 100);
+        setDiscount(pct.toString());
+      }
+    }
+  };
+
+  const handleDiscountChange = (val: string) => {
+    setDiscount(val);
+    if (price && val) {
+      const p = parseFloat(price);
+      const d = parseFloat(val);
+      if (!isNaN(p) && !isNaN(d)) {
+        const finalDisc = Math.round(p - (p * d) / 100);
+        setDiscountedPrice(finalDisc.toString());
+      }
+    } else if (!val) {
+      setDiscountedPrice('');
+    }
+  };
+
+  const handleDiscountedPriceChange = (val: string) => {
+    setDiscountedPrice(val);
+    if (price && val) {
+      const p = parseFloat(price);
+      const dp = parseFloat(val);
+      if (!isNaN(p) && !isNaN(dp) && p > 0) {
+        const pct = Math.round(((p - dp) / p) * 100);
+        setDiscount(pct.toString());
+      }
+    } else if (!val) {
+      setDiscount('');
+    }
+  };
 
   useEffect(() => {
     if (product) {
@@ -45,13 +90,28 @@ export default function ProductForm({
       setDescription(product.description || '');
       setPrice(product.price.toString());
       setDiscountedPrice(product.discounted_price ? product.discounted_price.toString() : '');
+      if (product.price && product.discounted_price) {
+        const pct = Math.round(((product.price - product.discounted_price) / product.price) * 100);
+        setDiscount(pct.toString());
+      } else {
+        setDiscount('');
+      }
       setQty(product.quantity_in_stock.toString());
       setSku(product.sku || '');
-      setOccasion(product.occasion || '');
-      setLandingSection(product.landing_section || 'NONE');
-      setFeaturedType(product.featured_type || 'TOP_PICKS');
       setImages(product.images || []);
-      setVariants(product.variants || []);
+      let parsedVariants = [];
+      if (product.variants) {
+        if (Array.isArray(product.variants)) {
+          parsedVariants = product.variants;
+        } else if (typeof product.variants === 'string') {
+          try {
+            parsedVariants = JSON.parse(product.variants);
+          } catch (e) {
+            console.error('Failed parsing variants string', e);
+          }
+        }
+      }
+      setVariants(parsedVariants);
       setIsActive(product.is_active);
       setIsFeatured(product.is_featured);
     } else {
@@ -60,12 +120,10 @@ export default function ProductForm({
       setVendorId(vendorsList[0]?.id || '');
       setDescription('');
       setPrice('');
+      setDiscount('');
       setDiscountedPrice('');
       setQty('10');
       setSku('');
-      setOccasion('');
-      setLandingSection('NONE');
-      setFeaturedType('TOP_PICKS');
       setImages(['https://images.unsplash.com/photo-1594736797933-d0501ba21155?w=500&auto=format&fit=crop&q=80']); // prefill a placeholder product image
       setVariants([]);
       setIsActive(true);
@@ -97,9 +155,9 @@ export default function ProductForm({
       discounted_price: discountedPrice ? parseFloat(discountedPrice) : null,
       quantity_in_stock: parseInt(qty),
       sku: sku.trim() || null,
-      occasion: occasion.trim() || null,
-      landing_section: landingSection,
-      featured_type: featuredType,
+      occasion: null,
+      landing_section: null,
+      featured_type: null,
       images,
       variants,
       is_active: isActive,
@@ -165,19 +223,33 @@ export default function ProductForm({
       </div>
 
       {/* Price and inventory info */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {/* Original Price */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Original Price (₹) *</label>
           <input
             type="number"
             value={price}
-            onChange={e => setPrice(e.target.value)}
+            onChange={e => handlePriceChange(e.target.value)}
             placeholder="e.g. 2999"
             min="0"
             step="0.01"
             className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
             required
+          />
+        </div>
+
+        {/* Discount Percent */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Discount (%)</label>
+          <input
+            type="number"
+            value={discount}
+            onChange={e => handleDiscountChange(e.target.value)}
+            placeholder="e.g. 10"
+            min="0"
+            max="100"
+            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
           />
         </div>
 
@@ -187,7 +259,7 @@ export default function ProductForm({
           <input
             type="number"
             value={discountedPrice}
-            onChange={e => setDiscountedPrice(e.target.value)}
+            onChange={e => handleDiscountedPriceChange(e.target.value)}
             placeholder="e.g. 2499"
             min="0"
             step="0.01"
@@ -210,60 +282,16 @@ export default function ProductForm({
         </div>
       </div>
 
-      {/* SKU and Occasion */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">SKU Code (Unique)</label>
-          <input
-            type="text"
-            value={sku}
-            onChange={e => setSku(e.target.value)}
-            placeholder="e.g. MLN-SAREE-RED-001"
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 font-mono"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Target Occasion</label>
-          <input
-            type="text"
-            value={occasion}
-            onChange={e => setOccasion(e.target.value)}
-            placeholder="e.g. Bridal Wear, Office Formal..."
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-          />
-        </div>
-      </div>
-
-      {/* Landing Section and Featured Type */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Landing Page Section Placement</label>
-          <select
-            value={landingSection}
-            onChange={e => setLandingSection(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
-          >
-            <option value="NONE">None (Catalog Only)</option>
-            <option value="HERO">Hero Banner Section</option>
-            <option value="TRENDING">Trending Section</option>
-            <option value="NEW_ARRIVALS">New Arrivals Grid</option>
-            <option value="DISCOUNTS">Discounts Section</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Featured Group Category</label>
-          <select
-            value={featuredType}
-            onChange={e => setFeaturedType(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
-          >
-            <option value="TOP_PICKS">Top Picks</option>
-            <option value="BEST_SELLERS">Best Sellers</option>
-            <option value="SPECIAL_DEALS">Special Deals</option>
-          </select>
-        </div>
+      {/* SKU */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">SKU Code (Unique)</label>
+        <input
+          type="text"
+          value={sku}
+          onChange={e => setSku(e.target.value)}
+          placeholder="e.g. MLN-SAREE-RED-001"
+          className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 font-mono"
+        />
       </div>
 
       {/* Description */}

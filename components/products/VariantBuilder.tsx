@@ -21,6 +21,8 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
 
+  const safeVariants = Array.isArray(variants) ? variants : [];
+
   const handleAdd = () => {
     if (!color.trim() && !size.trim()) return;
 
@@ -31,7 +33,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
       stock: stock ? parseInt(stock) : undefined,
     };
 
-    onChange([...variants, newVariant]);
+    onChange([...safeVariants, newVariant]);
     setColor('');
     setSize('');
     setPrice('');
@@ -39,61 +41,57 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
   };
 
   const handleRemove = (index: number) => {
-    onChange(variants.filter((_, idx) => idx !== index));
+    onChange(safeVariants.filter((_, idx) => idx !== index));
   };
 
   return (
-    <div className="flex flex-col gap-3.5 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 select-none">
-      <div className="flex items-center gap-2 pb-1 border-b border-zinc-200 dark:border-zinc-800/80">
+    <div className="flex flex-col gap-2.5 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10">
+      <div className="flex items-center gap-1.5 pb-2 border-b border-zinc-200 dark:border-zinc-800">
         <Sliders className="w-4 h-4 text-indigo-500" />
-        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Variants Manager</h4>
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Variants & Sizes</span>
       </div>
 
-      {/* Input row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-end">
+      {/* Inputs grid */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-zinc-400 uppercase">Color</label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">Color</label>
           <input
-            type="text"
             value={color}
             onChange={e => setColor(e.target.value)}
-            placeholder="e.g. Red, Crimson"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            placeholder="e.g. Red"
+            className="form-input text-[11px] h-9 text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-zinc-400 uppercase">Size / Option</label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">Size / Option</label>
           <input
-            type="text"
             value={size}
             onChange={e => setSize(e.target.value)}
-            placeholder="e.g. M, L, XL, 256GB"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            placeholder="e.g. XL, 6m"
+            className="form-input text-[11px] h-9 text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-zinc-400 uppercase">Price (₹)</label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">Price override (₹)</label>
           <input
-            type="number"
             value={price}
             onChange={e => setPrice(e.target.value)}
-            placeholder="Override price"
-            min="0"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            placeholder="e.g. 1299"
+            type="number"
+            className="form-input text-[11px] h-9 text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-zinc-400 uppercase">Stock Qty</label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">Stock override</label>
           <input
-            type="number"
             value={stock}
             onChange={e => setStock(e.target.value)}
-            placeholder="Override stock"
-            min="0"
-            className="form-input text-xs text-foreground bg-background border border-zinc-200 dark:border-zinc-800 py-1.5"
+            placeholder="e.g. 50"
+            type="number"
+            className="form-input text-[11px] h-9 text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
           />
         </div>
 
@@ -107,7 +105,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
       </div>
 
       {/* Variants List grid/table */}
-      {variants.length === 0 ? (
+      {safeVariants.length === 0 ? (
         <span className="text-[11px] text-zinc-400 italic text-center py-2">No variants created. Product defaults will apply.</span>
       ) : (
         <div className="w-full overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800 bg-background mt-1">
@@ -122,7 +120,7 @@ export default function VariantBuilder({ variants, onChange }: VariantBuilderPro
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {variants.map((v, index) => (
+              {safeVariants.map((v, index) => (
                 <tr key={index} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/10">
                   <td className="py-2 px-3 font-semibold text-foreground">{v.color || <span className="text-zinc-400">-</span>}</td>
                   <td className="py-2 px-3 font-semibold text-foreground">{v.size || <span className="text-zinc-400">-</span>}</td>

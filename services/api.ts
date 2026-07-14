@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 /**
  * Handle API Response errors
@@ -135,6 +135,73 @@ export async function updateProduct(id: string, productData: any) {
 export async function deleteProduct(id: string) {
   const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
     method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// ─── Campaign/Extra Page APIs ──────────────────────────────────────────────────
+
+export async function getAllProductsAdmin() {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/all`);
+  return handleResponse(res);
+}
+
+export async function getOccasionsList() {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/occasions`);
+  return handleResponse(res);
+}
+
+export async function createOrUpdateOccasion(name: string, image: string) {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/occasions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, image }),
+  });
+  return handleResponse(res);
+}
+
+export async function updateOccasion(oldName: string, name: string, image: string) {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/occasions/${encodeURIComponent(oldName)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, image }),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteOccasion(name: string) {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/occasions/${encodeURIComponent(name)}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+export async function getProductsBySection(section: string) {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/section/${encodeURIComponent(section)}`);
+  return handleResponse(res);
+}
+
+export async function getProductsByOccasionName(name: string) {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/occasion/${encodeURIComponent(name)}`);
+  return handleResponse(res);
+}
+
+export async function getProductsOnSale() {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/on-sale`);
+  return handleResponse(res);
+}
+
+// Patch a product's campaign fields only (section/occasion/sale)
+export async function patchProductCampaign(id: string, patch: {
+  featured_type?: string | null;
+  landing_section?: string | null;
+  occasion?: string | null;
+  discounted_price?: number | null;
+}) {
+  const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
   });
   return handleResponse(res);
 }

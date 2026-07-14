@@ -11,6 +11,7 @@ import CategoryGrid from '@/components/categories/CategoryGrid';
 import CategoryForm from '@/components/categories/CategoryForm';
 import ProductTable from '@/components/products/ProductTable';
 import ProductForm from '@/components/products/ProductForm';
+import ExtraPage from '@/components/extra/ExtraPage';
 import Modal from '@/components/ui/Modal';
 import Toast, { ToastType } from '@/components/ui/Toast';
 import { Plus, RefreshCcw } from 'lucide-react';
@@ -22,6 +23,20 @@ import {
   SEED_CATEGORIES,
   SEED_PRODUCTS
 } from '@/lib/seedData';
+import { 
+  getCategoriesList, 
+  createCategory, 
+  updateCategory, 
+  deleteCategory,
+  getVendorsList,
+  createVendor,
+  updateVendor,
+  deleteVendor,
+  getProductsList,
+  createProduct,
+  updateProduct,
+  deleteProduct
+} from '@/services/api';
 
 // Generate safe UUIDs for new records on client side
 const generateUUID = () => {
@@ -97,16 +112,10 @@ export default function AppMain() {
       setIsDarkMode(true);
     }
 
-    // 2. Local Dataset Seeding
-    if (!localStorage.getItem('vendors')) {
-      localStorage.setItem('vendors', JSON.stringify(SEED_VENDORS));
-    }
-    if (!localStorage.getItem('categories')) {
-      localStorage.setItem('categories', JSON.stringify(SEED_CATEGORIES));
-    }
-    if (!localStorage.getItem('products')) {
-      localStorage.setItem('products', JSON.stringify(SEED_PRODUCTS));
-    }
+    // 2. Clear local storage seeds to ensure clean dynamic database queries
+    localStorage.removeItem('vendors');
+    localStorage.removeItem('categories');
+    localStorage.removeItem('products');
 
     // 3. Authenticate Session
     const savedUser = localStorage.getItem('userSession');
@@ -121,28 +130,11 @@ export default function AppMain() {
   }, []);
 
   // Fetch / Query Data Local Routines
-  const queryVendors = () => {
+  const queryVendors = async () => {
     setLoadingVendors(true);
     try {
-      const stored = localStorage.getItem('vendors');
-      let list: Vendor[] = stored ? JSON.parse(stored) : [];
-
-      if (vendorSearch) {
-        const query = vendorSearch.toLowerCase();
-        list = list.filter(
-          v =>
-            v.name.toLowerCase().includes(query) ||
-            v.email.toLowerCase().includes(query) ||
-            v.phone.toLowerCase().includes(query)
-        );
-      }
-
-      if (vendorStatusFilter !== 'all') {
-        const isActiveVal = vendorStatusFilter === 'active';
-        list = list.filter(v => v.is_active === isActiveVal);
-      }
-
-      setVendors(list);
+      const res = await getVendorsList(vendorSearch, vendorStatusFilter);
+      setVendors(res.data || []);
     } catch (e) {
       showToast('Error reading vendor list.', 'error');
     } finally {
@@ -150,28 +142,13 @@ export default function AppMain() {
     }
   };
 
-  const queryCategories = () => {
+  const queryCategories = async () => {
     setLoadingCategories(true);
     try {
-      const storedCat = localStorage.getItem('categories');
+      const res = await getCategoriesList(categorySearch, categoryStatusFilter);
+      const list: ProductCategory[] = res.data || [];
       const storedVend = localStorage.getItem('vendors');
-      
-      let list: ProductCategory[] = storedCat ? JSON.parse(storedCat) : [];
       const vendorList: Vendor[] = storedVend ? JSON.parse(storedVend) : [];
-
-      if (categorySearch) {
-        const query = categorySearch.toLowerCase();
-        list = list.filter(
-          c =>
-            c.category_name.toLowerCase().includes(query) ||
-            (c.category_description && c.category_description.toLowerCase().includes(query))
-        );
-      }
-
-      if (categoryStatusFilter !== 'all') {
-        const isActiveVal = categoryStatusFilter === 'active';
-        list = list.filter(c => c.is_active === isActiveVal);
-      }
 
       // Join parent and vendor names in Javascript
       const enriched = list.map(c => {
@@ -192,52 +169,16 @@ export default function AppMain() {
     }
   };
 
-  const queryProducts = () => {
+  const queryProducts = async () => {
     setLoadingProducts(true);
     try {
-      const storedProd = localStorage.getItem('products');
-      const storedCat = localStorage.getItem('categories');
-      const storedVend = localStorage.getItem('vendors');
-
-      let list: ProductDetail[] = storedProd ? JSON.parse(storedProd) : [];
-      const catList: ProductCategory[] = storedCat ? JSON.parse(storedCat) : [];
-      const vendList: Vendor[] = storedVend ? JSON.parse(storedVend) : [];
-
-      if (productSearch) {
-        const query = productSearch.toLowerCase();
-        list = list.filter(
-          p =>
-            p.product_name.toLowerCase().includes(query) ||
-            (p.description && p.description.toLowerCase().includes(query)) ||
-            (p.sku && p.sku.toLowerCase().includes(query))
-        );
-      }
-
-      if (productCatFilter !== 'all') {
-        list = list.filter(p => p.category_id === productCatFilter);
-      }
-
-      if (productVendFilter !== 'all') {
-        list = list.filter(p => p.vendor_id === productVendFilter);
-      }
-
-      if (productActiveFilter !== 'all') {
-        const isActiveVal = productActiveFilter === 'active';
-        list = list.filter(p => p.is_active === isActiveVal);
-      }
-
-      // Join Category name and Vendor name
-      const enriched = list.map(p => {
-        const cat = catList.find(c => c.id === p.category_id);
-        const vend = vendList.find(v => v.id === p.vendor_id);
-        return {
-          ...p,
-          category_name: cat ? cat.category_name : 'Unknown Category',
-          vendor_name: vend ? vend.name : 'Unknown Vendor',
-        };
-      });
-
-      setProducts(enriched);
+      const res = await getProductsList(
+        productSearch,
+        productCatFilter !== 'all' ? productCatFilter : '',
+        productVendFilter !== 'all' ? productVendFilter : '',
+        productActiveFilter !== 'all' ? productActiveFilter : ''
+      );
+      setProducts(res.data || []);
     } catch (e) {
       showToast('Error reading product catalog.', 'error');
     } finally {
@@ -277,242 +218,131 @@ export default function AppMain() {
   };
 
   // Local CRUD operations - VENDORS
-  const handleVendorSubmit = (formData: any) => {
+  const handleVendorSubmit = async (formData: any) => {
     try {
-      const stored = localStorage.getItem('vendors');
-      const list: Vendor[] = stored ? JSON.parse(stored) : [];
-
       if (editingVendor) {
         // Edit mode
-        const index = list.findIndex(v => v.id === editingVendor.id);
-        if (index !== -1) {
-          list[index] = {
-            ...list[index],
-            ...formData,
-            updated_at: new Date().toISOString(),
-          };
-          localStorage.setItem('vendors', JSON.stringify(list));
-          showToast('Merchant details updated successfully.', 'success');
-        }
+        await updateVendor(editingVendor.id, formData);
+        showToast('Merchant details updated successfully.', 'success');
       } else {
         // Create mode
-        const emailExists = list.some(v => v.email.toLowerCase() === formData.email.toLowerCase());
-        const phoneExists = list.some(v => v.phone === formData.phone);
-        if (emailExists) return showToast('Email already registered.', 'error');
-        if (phoneExists) return showToast('Phone number already registered.', 'error');
-
-        const newVendor: Vendor = {
-          ...formData,
-          id: 'v-' + generateUUID(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        list.unshift(newVendor);
-        localStorage.setItem('vendors', JSON.stringify(list));
+        await createVendor(formData);
         showToast('New vendor merchant registered!', 'success');
       }
 
       setVendorModalOpen(false);
       setEditingVendor(null);
       queryVendors();
-    } catch (e) {
-      showToast('Failed to save vendor details.', 'error');
+    } catch (e: any) {
+      showToast(e.message || 'Failed to save vendor details.', 'error');
     }
   };
 
-  const handleToggleVendorStatus = (id: string, currentStatus: boolean) => {
+  const handleToggleVendorStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const stored = localStorage.getItem('vendors');
-      const list: Vendor[] = stored ? JSON.parse(stored) : [];
-      const index = list.findIndex(v => v.id === id);
-      
-      if (index !== -1) {
-        list[index].is_active = !currentStatus;
-        list[index].updated_at = new Date().toISOString();
-        localStorage.setItem('vendors', JSON.stringify(list));
-        showToast('Vendor active status toggled.', 'success');
-        queryVendors();
-      }
-    } catch (e) {
-      showToast('Error changing vendor status.', 'error');
+      await updateVendor(id, { is_active: !currentStatus });
+      showToast('Vendor active status toggled.', 'success');
+      queryVendors();
+    } catch (e: any) {
+      showToast(e.message || 'Error changing vendor status.', 'error');
     }
   };
 
-  const handleVendorDelete = (id: string) => {
+  const handleVendorDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this merchant account?')) return;
     try {
-      const stored = localStorage.getItem('vendors');
-      let list: Vendor[] = stored ? JSON.parse(stored) : [];
-      list = list.filter(v => v.id !== id);
-      localStorage.setItem('vendors', JSON.stringify(list));
+      await deleteVendor(id);
       showToast('Vendor account deleted.', 'success');
       queryVendors();
-    } catch (e) {
-      showToast('Failed to delete merchant.', 'error');
+    } catch (e: any) {
+      showToast(e.message || 'Failed to delete merchant.', 'error');
     }
   };
 
   // Local CRUD operations - CATEGORIES
-  const handleCategorySubmit = (formData: any) => {
+  const handleCategorySubmit = async (formData: any) => {
     try {
-      const stored = localStorage.getItem('categories');
-      const list: ProductCategory[] = stored ? JSON.parse(stored) : [];
-      const slug = slugify(formData.category_name);
-
       if (editingCategory) {
-        const index = list.findIndex(c => c.id === editingCategory.id);
-        if (index !== -1) {
-          list[index] = {
-            ...list[index],
-            ...formData,
-            category_slug: slug,
-            updated_at: new Date().toISOString(),
-          };
-          localStorage.setItem('categories', JSON.stringify(list));
-          showToast('Category catalog updated successfully.', 'success');
-        }
+        await updateCategory(editingCategory.id, formData);
+        showToast('Category catalog updated successfully.', 'success');
       } else {
-        const exists = list.some(c => c.category_name.toLowerCase() === formData.category_name.toLowerCase());
-        if (exists) return showToast('Category name already exists.', 'error');
-
-        const newCategory: ProductCategory = {
-          ...formData,
-          id: 'c-' + generateUUID(),
-          category_slug: slug,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        list.push(newCategory);
-        localStorage.setItem('categories', JSON.stringify(list));
+        await createCategory(formData);
         showToast('Category created successfully!', 'success');
       }
 
       setCategoryModalOpen(false);
       setEditingCategory(null);
       queryCategories();
-    } catch (e) {
-      showToast('Failed to save category details.', 'error');
+    } catch (e: any) {
+      showToast(e.message || 'Failed to save category details.', 'error');
     }
   };
 
-  const handleCategoryDelete = (id: string) => {
+  const handleCategoryDelete = async (id: string) => {
     if (!confirm('Remove this category from the catalog? Child categories will become top-level.')) return;
     try {
-      const stored = localStorage.getItem('categories');
-      let list: ProductCategory[] = stored ? JSON.parse(stored) : [];
-
-      // Unbind child categories
-      list.forEach(c => {
-        if (c.parent_category_id === id) {
-          c.parent_category_id = null;
-        }
-      });
-
-      list = list.filter(c => c.id !== id);
-      localStorage.setItem('categories', JSON.stringify(list));
+      await deleteCategory(id);
       showToast('Category deleted successfully.', 'success');
       queryCategories();
       queryProducts(); // update products in case of restrict bindings
-    } catch (e) {
-      showToast('Failed to delete category.', 'error');
+    } catch (e: any) {
+      showToast(e.message || 'Failed to delete category.', 'error');
     }
   };
 
   // Local CRUD operations - PRODUCTS
-  const handleProductSubmit = (formData: any) => {
+  const handleProductSubmit = async (formData: any) => {
     try {
-      const stored = localStorage.getItem('products');
-      const list: ProductDetail[] = stored ? JSON.parse(stored) : [];
       const slug = slugify(formData.product_name);
+      const submissionData = {
+        ...formData,
+        product_slug: slug,
+      };
 
       if (editingProduct) {
-        const index = list.findIndex(p => p.id === editingProduct.id);
-        if (index !== -1) {
-          list[index] = {
-            ...list[index],
-            ...formData,
-            product_slug: slug,
-            updated_at: new Date().toISOString(),
-          };
-          localStorage.setItem('products', JSON.stringify(list));
-          showToast('Product updated successfully.', 'success');
-        }
+        await updateProduct(editingProduct.id, submissionData);
+        showToast('Product updated successfully.', 'success');
       } else {
-        if (formData.sku) {
-          const skuExists = list.some(p => p.sku === formData.sku);
-          if (skuExists) return showToast('SKU code already exists.', 'error');
-        }
-
-        const newProduct: ProductDetail = {
-          ...formData,
-          id: 'p-' + generateUUID(),
-          product_slug: slug,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        list.unshift(newProduct);
-        localStorage.setItem('products', JSON.stringify(list));
+        await createProduct(submissionData);
         showToast('Product added to merchant catalog!', 'success');
       }
 
       setProductModalOpen(false);
       setEditingProduct(null);
       queryProducts();
-    } catch (e) {
-      showToast('Failed to save product details.', 'error');
+    } catch (e: any) {
+      showToast(e.message || 'Failed to save product details.', 'error');
     }
   };
 
-  const handleToggleProductActive = (id: string, currentStatus: boolean) => {
+  const handleToggleProductActive = async (id: string, currentStatus: boolean) => {
     try {
-      const stored = localStorage.getItem('products');
-      const list: ProductDetail[] = stored ? JSON.parse(stored) : [];
-      const index = list.findIndex(p => p.id === id);
-
-      if (index !== -1) {
-        list[index].is_active = !currentStatus;
-        list[index].updated_at = new Date().toISOString();
-        localStorage.setItem('products', JSON.stringify(list));
-        showToast('Product active status changed.', 'success');
-        queryProducts();
-      }
-    } catch (e) {
-      showToast('Failed to change product status.', 'error');
+      await updateProduct(id, { is_active: !currentStatus });
+      showToast('Product active status changed.', 'success');
+      queryProducts();
+    } catch (e: any) {
+      showToast(e.message || 'Failed to change product status.', 'error');
     }
   };
 
-  const handleToggleProductFeatured = (id: string, currentStatus: boolean) => {
+  const handleToggleProductFeatured = async (id: string, currentStatus: boolean) => {
     try {
-      const stored = localStorage.getItem('products');
-      const list: ProductDetail[] = stored ? JSON.parse(stored) : [];
-      const index = list.findIndex(p => p.id === id);
-
-      if (index !== -1) {
-        list[index].is_featured = !currentStatus;
-        list[index].updated_at = new Date().toISOString();
-        localStorage.setItem('products', JSON.stringify(list));
-        showToast(!currentStatus ? 'Product spotlight active.' : 'Product spotlight disabled.', 'success');
-        queryProducts();
-      }
-    } catch (e) {
-      showToast('Failed to change featured status.', 'error');
+      await updateProduct(id, { is_featured: !currentStatus });
+      showToast(!currentStatus ? 'Product spotlight active.' : 'Product spotlight disabled.', 'success');
+      queryProducts();
+    } catch (e: any) {
+      showToast(e.message || 'Failed to change featured status.', 'error');
     }
   };
 
-  const handleProductDelete = (id: string) => {
+  const handleProductDelete = async (id: string) => {
     if (!confirm('Remove this product from catalog inventory?')) return;
     try {
-      const stored = localStorage.getItem('products');
-      let list: ProductDetail[] = stored ? JSON.parse(stored) : [];
-      list = list.filter(p => p.id !== id);
-      localStorage.setItem('products', JSON.stringify(list));
+      await deleteProduct(id);
       showToast('Product deleted successfully.', 'success');
       queryProducts();
-    } catch (e) {
-      showToast('Failed to delete product.', 'error');
+    } catch (e: any) {
+      showToast(e.message || 'Failed to delete product.', 'error');
     }
   };
 
@@ -658,6 +488,10 @@ export default function AppMain() {
                   setSearchQuery={setCategorySearch}
                   statusFilter={categoryStatusFilter}
                   setStatusFilter={setCategoryStatusFilter}
+                  onSelect={(catId) => {
+                    setProductCatFilter(catId);
+                    setCurrentTab('products');
+                  }}
                 />
               </div>
             )}
@@ -703,6 +537,11 @@ export default function AppMain() {
                   setActiveFilter={setProductActiveFilter}
                 />
               </div>
+            )}
+
+            {/* TAB: CAMPAIGNS (EXTRA) */}
+            {currentTab === 'extra' && (
+              <ExtraPage onToast={showToast} />
             )}
 
           </div>

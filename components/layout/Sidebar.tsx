@@ -9,7 +9,8 @@ import {
   LogOut, 
   Sun, 
   Moon,
-  ShoppingBag
+  ShoppingBag,
+  Sparkles
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -34,6 +35,7 @@ export default function Sidebar({
     { id: 'vendors', label: 'Vendors', icon: Users },
     { id: 'categories', label: 'Categories', icon: FolderTree },
     { id: 'products', label: 'Products', icon: Package },
+    { id: 'extra', label: 'Campaigns', icon: Sparkles },
   ];
 
   const toggleTheme = () => {
