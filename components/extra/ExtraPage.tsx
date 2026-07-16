@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Sparkles, LayoutGrid, Calendar, Tag, ChevronRight, X,
-  Plus, Loader2, Search, RefreshCcw, Zap
+  Plus, Loader2, Search, RefreshCcw, Zap, Edit, Trash2
 } from 'lucide-react';
 import {
   getAllProductsAdmin,
