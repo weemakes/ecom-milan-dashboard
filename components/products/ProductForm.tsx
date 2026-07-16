@@ -116,15 +116,15 @@ export default function ProductForm({
       setIsFeatured(product.is_featured);
     } else {
       setName('');
-      setCategoryId(categoriesList[0]?.id || '');
-      setVendorId(vendorsList[0]?.id || '');
+      setCategoryId('');
+      setVendorId('');
       setDescription('');
       setPrice('');
       setDiscount('');
       setDiscountedPrice('');
       setQty('10');
       setSku('');
-      setImages(['https://images.unsplash.com/photo-1594736797933-d0501ba21155?w=500&auto=format&fit=crop&q=80']); // prefill a placeholder product image
+      setImages([]);
       setVariants([]);
       setIsActive(true);
       setIsFeatured(false);
@@ -190,31 +190,31 @@ export default function ProductForm({
       </div>
 
       {/* Category and Vendor */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1 flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Category *</label>
           <select
             value={categoryId}
             onChange={e => setCategoryId(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
+            className="form-input w-full text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
             required
           >
-            <option value="" disabled>Select category</option>
+            <option value="">Select a category</option>
             {categoriesList.map(c => (
               <option key={c.id} value={c.id}>{c.category_name}</option>
             ))}
           </select>
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex-1 flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Merchant Ownership *</label>
           <select
             value={vendorId}
             onChange={e => setVendorId(e.target.value)}
-            className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
+            className="form-input w-full text-foreground bg-background border border-zinc-200 dark:border-zinc-800 cursor-pointer"
             required
           >
-            <option value="" disabled>Select merchant</option>
+            <option value="">Select a vendor</option>
             {vendorsList.map(v => (
               <option key={v.id} value={v.id}>{v.name}</option>
             ))}

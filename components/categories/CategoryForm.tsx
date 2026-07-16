@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProductCategory, Vendor } from '@/lib/seedData';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, Upload } from 'lucide-react';
 
 interface CategoryFormProps {
   category?: ProductCategory | null;
@@ -45,6 +45,17 @@ export default function CategoryForm({
     }
     setError('');
   }, [category]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImgUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Filter out the category itself and its descendants to prevent circular routing
   const eligibleParents = categoriesList.filter(c => {
@@ -95,17 +106,29 @@ export default function CategoryForm({
             />
           </div>
 
-          {/* Category Image URL */}
+          {/* Category Image URL or File Upload */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Category Image URL *</label>
-            <input
-              type="url"
-              value={imgUrl}
-              onChange={e => setImgUrl(e.target.value)}
-              placeholder="https://images.unsplash.com/..."
-              className="form-input text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
-              required
-            />
+            <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Category Image *</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={imgUrl.startsWith('data:') ? 'Image uploaded (Base64 file)' : imgUrl}
+                onChange={e => setImgUrl(e.target.value)}
+                placeholder="Paste URL or upload file..."
+                className="form-input flex-1 text-foreground bg-background border border-zinc-200 dark:border-zinc-800"
+                required
+              />
+              <label className="shrink-0 flex items-center justify-center gap-1.5 px-4 py-2 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-500 hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer bg-background transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Upload className="w-3.5 h-3.5" />
+                Upload
+              </label>
+            </div>
           </div>
         </div>
 

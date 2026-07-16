@@ -99,6 +99,19 @@ export default function AppMain() {
   // Toast Notification State
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
+  // Confirm Delete Modal State
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    type: 'product' | 'category' | 'vendor' | null;
+    id: string;
+    name: string;
+  }>({
+    isOpen: false,
+    type: null,
+    id: '',
+    name: '',
+  });
+
   // Note: For backend integration later, you can import and call services/api.ts functions directly.
   // const USE_LIVE_BACKEND = false;
 
@@ -248,14 +261,38 @@ export default function AppMain() {
     }
   };
 
-  const handleVendorDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this merchant account?')) return;
+  const handleVendorDelete = (id: string) => {
+    const v = vendors.find(x => x.id === id);
+    setDeleteConfirm({
+      isOpen: true,
+      type: 'vendor',
+      id,
+      name: v ? v.name : 'this merchant account',
+    });
+  };
+
+  const executeDeleteConfirm = async () => {
+    const { type, id } = deleteConfirm;
+    setDeleteConfirm(prev => ({ ...prev, isOpen: false }));
+    if (!type || !id) return;
+    
     try {
-      await deleteVendor(id);
-      showToast('Vendor account deleted.', 'success');
-      queryVendors();
+      if (type === 'vendor') {
+        await deleteVendor(id);
+        showToast('Vendor account deleted.', 'success');
+        queryVendors();
+      } else if (type === 'category') {
+        await deleteCategory(id);
+        showToast('Category deleted successfully.', 'success');
+        queryCategories();
+        queryProducts();
+      } else if (type === 'product') {
+        await deleteProduct(id);
+        showToast('Product deleted successfully.', 'success');
+        queryProducts();
+      }
     } catch (e: any) {
-      showToast(e.message || 'Failed to delete merchant.', 'error');
+      showToast(e.message || `Failed to delete ${type}.`, 'error');
     }
   };
 
@@ -278,16 +315,14 @@ export default function AppMain() {
     }
   };
 
-  const handleCategoryDelete = async (id: string) => {
-    if (!confirm('Remove this category from the catalog? Child categories will become top-level.')) return;
-    try {
-      await deleteCategory(id);
-      showToast('Category deleted successfully.', 'success');
-      queryCategories();
-      queryProducts(); // update products in case of restrict bindings
-    } catch (e: any) {
-      showToast(e.message || 'Failed to delete category.', 'error');
-    }
+  const handleCategoryDelete = (id: string) => {
+    const c = categories.find(x => x.id === id);
+    setDeleteConfirm({
+      isOpen: true,
+      type: 'category',
+      id,
+      name: c ? c.category_name : 'this category',
+    });
   };
 
   // Local CRUD operations - PRODUCTS
@@ -335,15 +370,14 @@ export default function AppMain() {
     }
   };
 
-  const handleProductDelete = async (id: string) => {
-    if (!confirm('Remove this product from catalog inventory?')) return;
-    try {
-      await deleteProduct(id);
-      showToast('Product deleted successfully.', 'success');
-      queryProducts();
-    } catch (e: any) {
-      showToast(e.message || 'Failed to delete product.', 'error');
-    }
+  const handleProductDelete = (id: string) => {
+    const p = products.find(x => x.id === id);
+    setDeleteConfirm({
+      isOpen: true,
+      type: 'product',
+      id,
+      name: p ? p.product_name : 'this product',
+    });
   };
 
   // Metrics calculators
@@ -613,6 +647,43 @@ export default function AppMain() {
             setEditingProduct(null);
           }}
         />
+      </Modal>
+
+      {/* MODAL: DELETE CONFIRMATION */}
+      <Modal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm(prev => ({ ...prev, isOpen: false }))}
+        title="Confirm Deletion"
+        size="sm"
+        position="center"
+      >
+        <div className="flex flex-col gap-4 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 text-red-650 dark:text-red-400">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="text-base font-bold text-foreground">Are you sure?</h4>
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-zinc-800 dark:text-zinc-200">"{deleteConfirm.name}"</strong>? This action cannot be undone and will delete related listings.
+            </p>
+          </div>
+          <div className="flex gap-3 mt-2">
+            <button
+              onClick={() => setDeleteConfirm(prev => ({ ...prev, isOpen: false }))}
+              className="flex-1 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 bg-background text-zinc-600 dark:text-zinc-400 text-xs font-bold transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={executeDeleteConfirm}
+              className="flex-1 py-2 rounded-lg bg-red-650 hover:bg-red-600 text-white text-xs font-bold transition-all cursor-pointer shadow shadow-red-600/10 active:scale-98"
+            >
+              Yes, Delete
+            </button>
+          </div>
+        </div>
       </Modal>
 
       {/* TOAST NOTIFIER */}
