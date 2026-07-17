@@ -15,18 +15,18 @@ import ExtraPage from '@/components/extra/ExtraPage';
 import Modal from '@/components/ui/Modal';
 import Toast, { ToastType } from '@/components/ui/Toast';
 import { Plus, RefreshCcw } from 'lucide-react';
-import { 
-  Vendor, 
-  ProductCategory, 
+import {
+  Vendor,
+  ProductCategory,
   ProductDetail,
   SEED_VENDORS,
   SEED_CATEGORIES,
   SEED_PRODUCTS
 } from '@/lib/seedData';
-import { 
-  getCategoriesList, 
-  createCategory, 
-  updateCategory, 
+import {
+  getCategoriesList,
+  createCategory,
+  updateCategory,
   deleteCategory,
   getVendorsList,
   createVendor,
@@ -275,7 +275,7 @@ export default function AppMain() {
     const { type, id } = deleteConfirm;
     setDeleteConfirm(prev => ({ ...prev, isOpen: false }));
     if (!type || !id) return;
-    
+
     try {
       if (type === 'vendor') {
         await deleteVendor(id);
@@ -382,8 +382,8 @@ export default function AppMain() {
 
   // Metrics calculators
   const getStats = () => {
-    const avgPrice = products.length > 0 
-      ? products.reduce((acc, p) => acc + Number(p.price), 0) / products.length 
+    const avgPrice = products.length > 0
+      ? products.reduce((acc, p) => acc + Number(p.price), 0) / products.length
       : 0;
 
     return {
@@ -411,7 +411,7 @@ export default function AppMain() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground transition-all duration-300">
-      
+
       {/* Sidebar Layout */}
       <Sidebar
         currentTab={currentTab}
@@ -424,14 +424,14 @@ export default function AppMain() {
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-w-0">
-        
+
         {/* Header (dbType forces mock status display for pure frontend) */}
         <Header currentTab={currentTab} vendorName={user.name} dbType="mock" />
 
         {/* tab page routing switcher */}
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="max-w-6xl mx-auto flex flex-col gap-6">
-            
+
             {/* TAB: DASHBOARD */}
             {currentTab === 'dashboard' && (
               <div className="flex flex-col gap-6">
@@ -440,7 +440,7 @@ export default function AppMain() {
                     <h1 className="text-xl font-black text-foreground">Welcome to merchant center, {user.name}</h1>
                     <p className="text-xs text-zinc-500">Overview of e-commerce activities and active connections.</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       queryVendors(); queryCategories(); queryProducts();
                       showToast('Dashboard metrics refreshed.', 'success');
