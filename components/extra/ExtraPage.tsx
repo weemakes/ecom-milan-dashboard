@@ -20,21 +20,21 @@ import {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const SECTIONS = [
-  { id: 'top-picks',       label: 'Top Picks',       featuredType: 'TOP_PICKS',       color: 'indigo' },
-  { id: 'today-deals',     label: "Today's Deals",   featuredType: 'TODAY_DEALS',     color: 'amber' },
+  { id: 'top-picks', label: 'Top Picks', featuredType: 'TOP_PICKS', color: 'indigo' },
+  { id: 'today-deals', label: "Today's Deals", featuredType: 'TODAY_DEALS', color: 'amber' },
   { id: 'deals-on-sarees', label: 'Deals on Sarees', featuredType: 'DEALS_ON_SAREES', color: 'rose' },
-  { id: 'best-value',      label: 'Best Value',      featuredType: 'BEST_VALUES',     color: 'emerald' },
-  { id: 'new-arrivals',    label: 'New Arrivals',    featuredType: 'NEW_ARRIVALS',    color: 'sky' },
-  { id: 'trending-now',    label: 'Trending Now',    featuredType: 'TRENDING_NOW',    color: 'purple' },
+  { id: 'best-value', label: 'Best Value', featuredType: 'BEST_VALUES', color: 'emerald' },
+  { id: 'new-arrivals', label: 'New Arrivals', featuredType: 'NEW_ARRIVALS', color: 'sky' },
+  { id: 'trending-now', label: 'Trending Now', featuredType: 'TRENDING_NOW', color: 'purple' },
 ];
 
 const COLOR_MAP: Record<string, string> = {
-  indigo:  'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
-  amber:   'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  rose:    'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+  indigo: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+  rose: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200 dark:border-rose-800',
   emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  sky:     'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 border-sky-200 dark:border-sky-800',
-  purple:  'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+  sky: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 border-sky-200 dark:border-sky-800',
+  purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -99,11 +99,10 @@ function ProductRow({
       <button
         onClick={() => onAction(product.id)}
         disabled={loading}
-        className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50 ${
-          action === 'remove'
-            ? 'bg-red-50 dark:bg-red-950/30 text-red-600 border border-red-200 dark:border-red-800 hover:bg-red-100'
-            : 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100'
-        }`}
+        className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50 ${action === 'remove'
+          ? 'bg-red-50 dark:bg-red-950/30 text-red-600 border border-red-200 dark:border-red-800 hover:bg-red-100'
+          : 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100'
+          }`}
       >
         {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : action === 'remove' ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
         {action === 'remove' ? 'Remove' : 'Add'}
@@ -208,9 +207,8 @@ function SectionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'er
         <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">Select Section</p>
         {SECTIONS.map(sec => (
           <button key={sec.id} onClick={() => pickSection(sec)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold text-left transition-all cursor-pointer ${
-              selectedSection?.id === sec.id ? COLOR_MAP[sec.color] + ' ring-2 ring-offset-1 ring-current' : 'border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-indigo-300'
-            }`}>
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold text-left transition-all cursor-pointer ${selectedSection?.id === sec.id ? COLOR_MAP[sec.color] + ' ring-2 ring-offset-1 ring-current' : 'border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-indigo-300'
+              }`}>
             <span className="w-2 h-2 rounded-full bg-current flex-shrink-0" />{sec.label}
             <ChevronRight className="w-4 h-4 ml-auto opacity-40" />
           </button>
@@ -313,11 +311,11 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
             const filtered = prev.filter(o => o.name !== editingOccasion.oldName);
             return [...filtered, { name: t, image: img }].sort((a, b) => a.name.localeCompare(b.name));
           });
-          
+
           if (selectedOccasion === editingOccasion.oldName) {
             setSelectedOccasion(t);
           }
-          
+
           setEditingOccasion(null);
           setNewOccasion('');
           setNewImage('');
@@ -405,11 +403,11 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
       const updatedProduct = { ...product, occasion: newValue };
       setOccasionProducts(p => [...p, updatedProduct]);
       setAllProducts(prev => prev.map(p => p.id === product.id ? updatedProduct : p));
-      
+
       if (!occasions.some(o => o.name === selectedOccasion)) {
-        setOccasions(prev => [...prev, { name: selectedOccasion, image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop' }].sort((a,b) => a.name.localeCompare(b.name)));
+        setOccasions(prev => [...prev, { name: selectedOccasion, image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop' }].sort((a, b) => a.name.localeCompare(b.name)));
       }
-      
+
       onToast(`Added to "${selectedOccasion}"`, 'success');
     } catch { onToast('Failed', 'error'); }
     finally { setActionLoading(null); }
@@ -427,7 +425,7 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
         <div className="flex flex-col gap-2 p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-zinc-800">
           <input value={newOccasion} onChange={e => setNewOccasion(e.target.value)}
             placeholder="Occasion name..." className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-background text-sm focus:outline-none focus:border-indigo-500" />
-          
+
           <div className="flex items-center gap-2">
             <label className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-500 hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer bg-background transition-colors">
               <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
@@ -453,32 +451,31 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
 
         {loadingList ? <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-indigo-500" /></div>
           : occasions.length === 0 ? <div className="py-6 text-center text-zinc-400 text-sm border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl">No occasions yet</div>
-          : (
-            <div className="flex flex-col gap-1.5 max-h-[350px] overflow-y-auto pr-1">
-              {occasions.map(occ => (
-                <div key={occ.name} className="group relative flex items-center w-full">
-                  <button onClick={() => pickOccasion(occ.name)}
-                    className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm font-semibold text-left transition-all cursor-pointer ${
-                      selectedOccasion === occ.name ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-300 dark:border-purple-700' : 'border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-purple-300'
-                    }`}>
-                    <img src={occ.image || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
-                    <span className="truncate pr-16">{occ.name}</span>
-                    <ChevronRight className="w-4 h-4 ml-auto opacity-40 group-hover:opacity-0" />
-                  </button>
-                  
-                  {/* Action buttons shown on hover */}
-                  <div className="absolute right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                    <button onClick={(e) => handleEditClick(occ, e)} className="p-1 rounded text-zinc-500 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer" title="Edit name & image">
-                      <Edit className="w-3.5 h-3.5" />
+            : (
+              <div className="flex flex-col gap-1.5 max-h-[350px] overflow-y-auto pr-1">
+                {occasions.map(occ => (
+                  <div key={occ.name} className="group relative flex items-center w-full">
+                    <button onClick={() => pickOccasion(occ.name)}
+                      className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm font-semibold text-left transition-all cursor-pointer ${selectedOccasion === occ.name ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-300 dark:border-purple-700' : 'border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-purple-300'
+                        }`}>
+                      <img src={occ.image || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                      <span className="truncate pr-16">{occ.name}</span>
+                      <ChevronRight className="w-4 h-4 ml-auto opacity-40 group-hover:opacity-0" />
                     </button>
-                    <button onClick={(e) => handleDeleteOccasion(occ.name, e)} className="p-1 rounded text-zinc-500 hover:text-red-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer" title="Delete occasion">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+
+                    {/* Action buttons shown on hover */}
+                    <div className="absolute right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                      <button onClick={(e) => handleEditClick(occ, e)} className="p-1 rounded text-zinc-500 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer" title="Edit name & image">
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={(e) => handleDeleteOccasion(occ.name, e)} className="p-1 rounded text-zinc-500 hover:text-red-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer" title="Delete occasion">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
       </div>
 
       <div className="flex flex-col gap-3">
@@ -487,10 +484,10 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
         </p>
         {!selectedOccasion ? <div className="py-16 text-center text-zinc-400 text-sm border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl">← Select an occasion</div>
           : loadingProducts ? <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-purple-500" /></div>
-          : occasionProducts.length === 0 ? <div className="py-12 text-center text-zinc-400 text-sm border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl">No products yet</div>
-          : <div className="flex flex-col gap-2 max-h-[480px] overflow-y-auto pr-1">
-              {occasionProducts.map(p => <ProductRow key={p.id} product={p} action="remove" onAction={handleRemove} loading={actionLoading === p.id} />)}
-            </div>}
+            : occasionProducts.length === 0 ? <div className="py-12 text-center text-zinc-400 text-sm border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl">No products yet</div>
+              : <div className="flex flex-col gap-2 max-h-[480px] overflow-y-auto pr-1">
+                {occasionProducts.map(p => <ProductRow key={p.id} product={p} action="remove" onAction={handleRemove} loading={actionLoading === p.id} />)}
+              </div>}
       </div>
 
       <div className="flex flex-col gap-3">
@@ -570,7 +567,7 @@ function FlashSalesTab({ onToast }: { onToast: (msg: string, type: 'success' | '
         </div>
         {loading ? <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-amber-500" /></div>
           : saleProducts.length === 0 ? <div className="py-12 text-center text-zinc-400 text-sm border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl">No products on sale</div>
-          : <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto pr-1">
+            : <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto pr-1">
               {saleProducts.map(p => <ProductRow key={p.id} product={p} action="remove" onAction={handleRemove} loading={actionLoading === p.id} />)}
             </div>}
       </div>
@@ -630,9 +627,9 @@ export default function ExtraPage({ onToast }: ExtraPageProps) {
   const [activeTab, setActiveTab] = useState<TabType>('sections');
 
   const TABS = [
-    { id: 'sections'  as TabType, label: 'Homepage Sections', icon: LayoutGrid, desc: 'Top Picks, Deals, New Arrivals, etc.' },
-    { id: 'occasions' as TabType, label: 'Occasions',          icon: Calendar,   desc: 'Festivals, Events & Seasonal groups' },
-    { id: 'sales'     as TabType, label: 'Flash Sales',        icon: Tag,        desc: 'Set discounts & flash sale campaigns' },
+    { id: 'sections' as TabType, label: 'Homepage Sections', icon: LayoutGrid, desc: 'Top Picks, Deals, New Arrivals, etc.' },
+    { id: 'occasions' as TabType, label: 'Occasions', icon: Calendar, desc: 'Festivals, Events & Seasonal groups' },
+    { id: 'sales' as TabType, label: 'Flash Sales', icon: Tag, desc: 'Set discounts & flash sale campaigns' },
   ];
 
   return (
@@ -652,9 +649,8 @@ export default function ExtraPage({ onToast }: ExtraPageProps) {
           const isActive = activeTab === tab.id;
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col gap-1 p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                isActive ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20' : 'bg-background text-foreground border-zinc-200 dark:border-zinc-800 hover:border-indigo-300'
-              }`}>
+              className={`flex flex-col gap-1 p-4 rounded-xl border text-left transition-all cursor-pointer ${isActive ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20' : 'bg-background text-foreground border-zinc-200 dark:border-zinc-800 hover:border-indigo-300'
+                }`}>
               <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-indigo-500'}`} />
               <span className="text-sm font-bold">{tab.label}</span>
               <span className={`text-[11px] leading-relaxed ${isActive ? 'text-indigo-200' : 'text-zinc-500'}`}>{tab.desc}</span>
@@ -664,9 +660,9 @@ export default function ExtraPage({ onToast }: ExtraPageProps) {
       </div>
 
       <div className="premium-card p-6">
-        {activeTab === 'sections'  && <SectionsTab   onToast={onToast} />}
-        {activeTab === 'occasions' && <OccasionsTab  onToast={onToast} />}
-        {activeTab === 'sales'     && <FlashSalesTab onToast={onToast} />}
+        {activeTab === 'sections' && <SectionsTab onToast={onToast} />}
+        {activeTab === 'occasions' && <OccasionsTab onToast={onToast} />}
+        {activeTab === 'sales' && <FlashSalesTab onToast={onToast} />}
       </div>
     </div>
   );
