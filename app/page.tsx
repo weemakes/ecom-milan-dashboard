@@ -12,6 +12,7 @@ import CategoryForm from '@/components/categories/CategoryForm';
 import ProductTable from '@/components/products/ProductTable';
 import ProductForm from '@/components/products/ProductForm';
 import ExtraPage from '@/components/extra/ExtraPage';
+import CustomerLeadsTable, { CustomerLead } from '@/components/customers/CustomerLeadsTable';
 import Modal from '@/components/ui/Modal';
 import Toast, { ToastType } from '@/components/ui/Toast';
 import { Plus, RefreshCcw } from 'lucide-react';
@@ -35,7 +36,9 @@ import {
   getProductsList,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getCustomersList,
+  deleteCustomerLead
 } from '@/services/api';
 
 // Generate safe UUIDs for new records on client side
@@ -68,11 +71,13 @@ export default function AppMain() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [customerLeads, setCustomerLeads] = useState<CustomerLead[]>([]);
 
   // Loading States (Simulate local query latency)
   const [loadingVendors, setLoadingVendors] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
 
   // Search & Filter States
   const [vendorSearch, setVendorSearch] = useState('');
@@ -199,6 +204,28 @@ export default function AppMain() {
     }
   };
 
+  const queryCustomerLeads = async () => {
+    setLoadingCustomers(true);
+    try {
+      const res = await getCustomersList();
+      setCustomerLeads(res.data || []);
+    } catch (e) {
+      showToast('Error loading customer coupon leads.', 'error');
+    } finally {
+      setLoadingCustomers(false);
+    }
+  };
+
+  const handleCustomerLeadDelete = async (id: string) => {
+    try {
+      await deleteCustomerLead(id);
+      setCustomerLeads((prev) => prev.filter((lead) => lead.id !== id));
+      showToast('Customer lead deleted successfully.', 'success');
+    } catch (e) {
+      showToast('Failed to delete customer lead.', 'error');
+    }
+  };
+
   // Triggers updates on local dependencies
   useEffect(() => {
     if (user) queryVendors();
@@ -211,6 +238,12 @@ export default function AppMain() {
   useEffect(() => {
     if (user) queryProducts();
   }, [user, productSearch, productCatFilter, productVendFilter, productActiveFilter]);
+
+  useEffect(() => {
+    if (user && currentTab === 'customers') {
+      queryCustomerLeads();
+    }
+  }, [user, currentTab]);
 
   // Toast Helper
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
@@ -576,6 +609,27 @@ export default function AppMain() {
             {/* TAB: CAMPAIGNS (EXTRA) */}
             {currentTab === 'extra' && (
               <ExtraPage onToast={showToast} />
+            )}
+
+            {/* TAB: CUSTOMER COUPON LEADS */}
+            {currentTab === 'customers' && (
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground tracking-tight">Coupon Leads & Customer Subscriptions</h2>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      View all users who claimed the 10% OFF discount coupon on the store website.
+                    </p>
+                  </div>
+                </div>
+
+                <CustomerLeadsTable
+                  leads={customerLeads}
+                  loading={loadingCustomers}
+                  onRefresh={queryCustomerLeads}
+                  onDelete={handleCustomerLeadDelete}
+                />
+              </div>
             )}
 
           </div>

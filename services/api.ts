@@ -205,3 +205,17 @@ export async function patchProductCampaign(id: string, patch: {
   });
   return handleResponse(res);
 }
+
+// ─── Customer / Coupon Leads APIs ──────────────────────────────────────────────
+
+export async function getCustomersList() {
+  const res = await fetch(`${API_BASE_URL}/api/customers`);
+  return handleResponse(res);
+}
+
+export async function deleteCustomerLead(id: string) {
+  const res = await fetch(`${API_BASE_URL}/api/customers/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}

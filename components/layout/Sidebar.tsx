@@ -10,7 +10,8 @@ import {
   Sun, 
   Moon,
   ShoppingBag,
-  Sparkles
+  Sparkles,
+  Ticket
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,6 +37,7 @@ export default function Sidebar({
     { id: 'categories', label: 'Categories', icon: FolderTree },
     { id: 'products', label: 'Products', icon: Package },
     { id: 'extra', label: 'Campaigns', icon: Sparkles },
+    { id: 'customers', label: 'Coupon Leads', icon: Ticket },
   ];
 
   const toggleTheme = () => {
