@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
@@ -213,9 +213,9 @@ export default function AppMain() {
   }, [user, productSearch, productCatFilter, productVendFilter, productActiveFilter]);
 
   // Toast Helper
-  const showToast = (message: string, type: ToastType = 'success') => {
+  const showToast = useCallback((message: string, type: ToastType = 'success') => {
     setToast({ message, type });
-  };
+  }, []);
 
   // Auth Functions
   const handleLoginSuccess = (loggedInVendor: { id: string; name: string; email: string }) => {
