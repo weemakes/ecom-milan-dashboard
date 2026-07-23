@@ -13,6 +13,7 @@ import ProductTable from '@/components/products/ProductTable';
 import ProductForm from '@/components/products/ProductForm';
 import ExtraPage from '@/components/extra/ExtraPage';
 import CustomerLeadsTable, { CustomerLead } from '@/components/customers/CustomerLeadsTable';
+import OrdersTable from '@/components/orders/OrdersTable';
 import Modal from '@/components/ui/Modal';
 import Toast, { ToastType } from '@/components/ui/Toast';
 import { Plus, RefreshCcw } from 'lucide-react';
@@ -38,7 +39,9 @@ import {
   updateProduct,
   deleteProduct,
   getCustomersList,
-  deleteCustomerLead
+  deleteCustomerLead,
+  getOrdersList,
+  updateOrderStatus
 } from '@/services/api';
 
 // Generate safe UUIDs for new records on client side
@@ -72,12 +75,14 @@ export default function AppMain() {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [customerLeads, setCustomerLeads] = useState<CustomerLead[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
 
   // Loading States (Simulate local query latency)
   const [loadingVendors, setLoadingVendors] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   // Search & Filter States
   const [vendorSearch, setVendorSearch] = useState('');
@@ -216,6 +221,28 @@ export default function AppMain() {
     }
   };
 
+  const queryOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const res = await getOrdersList();
+      setOrders(res.data || []);
+    } catch (e) {
+      showToast('Error loading orders.', 'error');
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (id: string, status: string) => {
+    try {
+      await updateOrderStatus(id, status);
+      showToast('Order status updated successfully.', 'success');
+      queryOrders();
+    } catch (e: any) {
+      showToast(e.message || 'Error updating order status.', 'error');
+    }
+  };
+
   const handleCustomerLeadDelete = async (id: string) => {
     try {
       await deleteCustomerLead(id);
@@ -240,8 +267,12 @@ export default function AppMain() {
   }, [user, productSearch, productCatFilter, productVendFilter, productActiveFilter]);
 
   useEffect(() => {
-    if (user && currentTab === 'customers') {
-      queryCustomerLeads();
+    if (user) {
+      if (currentTab === 'customers') {
+        queryCustomerLeads();
+      } else if (currentTab === 'orders') {
+        queryOrders();
+      }
     }
   }, [user, currentTab]);
 
@@ -602,6 +633,25 @@ export default function AppMain() {
                   setVendorFilter={setProductVendFilter}
                   activeFilter={productActiveFilter}
                   setActiveFilter={setProductActiveFilter}
+                />
+              </div>
+            )}
+
+            {/* TAB: ORDERS */}
+            {currentTab === 'orders' && (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-lg font-bold text-foreground">Customer Orders</h1>
+                    <p className="text-xs text-zinc-500">Track shipping, payment, and order fulfillment status.</p>
+                  </div>
+                </div>
+
+                <OrdersTable
+                  orders={orders}
+                  loading={loadingOrders}
+                  onRefresh={queryOrders}
+                  onUpdateStatus={handleUpdateOrderStatus}
                 />
               </div>
             )}

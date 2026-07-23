@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * Handle API Response errors
@@ -216,6 +216,21 @@ export async function getCustomersList() {
 export async function deleteCustomerLead(id: string) {
   const res = await fetch(`${API_BASE_URL}/api/customers/${id}`, {
     method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// ─── Orders APIs ─────────────────────────────────────────────────────────────
+export async function getOrdersList() {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/orders`);
+  return handleResponse(res);
+}
+
+export async function updateOrderStatus(id: string, status: string) {
+  const res = await fetch(`${API_BASE_URL}/api/products/admin/orders/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
   });
   return handleResponse(res);
 }

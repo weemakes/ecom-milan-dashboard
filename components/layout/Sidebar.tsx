@@ -36,6 +36,7 @@ export default function Sidebar({
     { id: 'vendors', label: 'Vendors', icon: Users },
     { id: 'categories', label: 'Categories', icon: FolderTree },
     { id: 'products', label: 'Products', icon: Package },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag },
     { id: 'extra', label: 'Campaigns', icon: Sparkles },
     { id: 'customers', label: 'Coupon Leads', icon: Ticket },
   ];
