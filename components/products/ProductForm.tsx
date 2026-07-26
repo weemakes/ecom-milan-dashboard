@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import { ProductDetail, ProductCategory, Vendor } from '@/lib/seedData';
 import VariantBuilder from './VariantBuilder';
 import ImageListBuilder from './ImageListBuilder';
@@ -9,7 +10,7 @@ interface ProductFormProps {
   product?: ProductDetail | null;
   categoriesList: ProductCategory[];
   vendorsList: Vendor[];
-  onSubmit: (formData: any) => void;
+  onSubmit: (formData: any) => Promise<void> | void;
   onCancel: () => void;
 }
 
@@ -34,6 +35,7 @@ export default function ProductForm({
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handlePriceChange = (val: string) => {
     setPrice(val);
@@ -132,7 +134,7 @@ export default function ProductForm({
     setError('');
   }, [product, categoriesList, vendorsList]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -146,23 +148,30 @@ export default function ProductForm({
     }
     if (parseInt(qty) < 0) return setError('Stock quantity cannot be negative.');
 
-    onSubmit({
-      product_name: name.trim(),
-      category_id: categoryId,
-      vendor_id: vendorId,
-      description: description.trim() || null,
-      price: parseFloat(price),
-      discounted_price: discountedPrice ? parseFloat(discountedPrice) : null,
-      quantity_in_stock: parseInt(qty),
-      sku: sku.trim() || null,
-      occasion: null,
-      landing_section: null,
-      featured_type: null,
-      images,
-      variants,
-      is_active: isActive,
-      is_featured: isFeatured,
-    });
+    setSubmitting(true);
+    try {
+      await onSubmit({
+        product_name: name.trim(),
+        category_id: categoryId,
+        vendor_id: vendorId,
+        description: description.trim() || null,
+        price: parseFloat(price),
+        discounted_price: discountedPrice ? parseFloat(discountedPrice) : null,
+        quantity_in_stock: parseInt(qty),
+        sku: sku.trim() || null,
+        occasion: null,
+        landing_section: null,
+        featured_type: null,
+        images,
+        variants,
+        is_active: isActive,
+        is_featured: isFeatured,
+      });
+    } catch (err: any) {
+      setError(err?.message || 'Failed to submit product form.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -358,15 +367,22 @@ export default function ProductForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm font-semibold transition-colors cursor-pointer"
+          disabled={submitting}
+          className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50 text-sm font-semibold transition-colors cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md shadow-indigo-600/10 transition-colors cursor-pointer"
+          disabled={submitting}
+          className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-600/70 disabled:cursor-not-allowed text-white text-sm font-semibold shadow-md shadow-indigo-600/10 transition-colors flex items-center gap-2 cursor-pointer"
         >
-          {product ? 'Save Updates' : 'Create Product'}
+          {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          <span>
+            {submitting 
+              ? (product ? 'Saving Updates...' : 'Creating Product...') 
+              : (product ? 'Save Updates' : 'Create Product')}
+          </span>
         </button>
       </div>
     </form>

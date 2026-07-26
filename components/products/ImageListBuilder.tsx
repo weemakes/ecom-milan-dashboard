@@ -7,7 +7,8 @@ import {
   Image as ImageIcon, 
   Link as LinkIcon, 
   Upload, 
-  Loader2
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 
 interface ImageListBuilderProps {
@@ -15,28 +16,51 @@ interface ImageListBuilderProps {
   onChange: (images: string[]) => void;
 }
 
+const MAX_FILE_SIZE_BYTES = 250 * 1024; // 250 KB limit
+
 export default function ImageListBuilder({ images, onChange }: ImageListBuilderProps) {
   const [activeTab, setActiveTab] = useState<'link' | 'upload'>('link');
   const [urlInput, setUrlInput] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Link Addition logic
   const handleAddLinks = () => {
+    setError(null);
     if (!urlInput.trim()) return;
 
     const parsedUrls = urlInput
       .split(/[,\n\s]+/)
       .map(u => u.trim())
-      .filter(u => u !== '' && /^https?:\/\/.+/i.test(u));
+      .filter(u => u !== '');
 
-    if (parsedUrls.length === 0) {
-      const fallbackUrl = urlInput.trim();
-      if (fallbackUrl && !images.includes(fallbackUrl)) {
-        onChange([...images, fallbackUrl]);
+    if (parsedUrls.length === 0) return;
+
+    const validUrls: string[] = [];
+    const oversizedBase64: string[] = [];
+
+    for (const u of parsedUrls) {
+      if (u.startsWith('data:image/')) {
+        const base64Data = u.split(',')[1] || '';
+        const approxBytes = (base64Data.length * 3) / 4;
+        if (approxBytes > MAX_FILE_SIZE_BYTES) {
+          oversizedBase64.push(`Pasted Base64 image (${(approxBytes / 1024).toFixed(1)} KB)`);
+          continue;
+        }
+      } else if (!/^https?:\/\/.+/i.test(u) && !u.startsWith('data:')) {
+        // Fallback or raw string
       }
-    } else {
-      const uniqueNewUrls = parsedUrls.filter(u => !images.includes(u));
+      validUrls.push(u);
+    }
+
+    if (oversizedBase64.length > 0) {
+      setError(`Image size must not exceed 250 KB. Rejected: ${oversizedBase64.join(', ')}`);
+    }
+
+    if (validUrls.length > 0) {
+      const uniqueNewUrls = validUrls.filter(u => !images.includes(u));
       if (uniqueNewUrls.length > 0) {
         onChange([...images, ...uniqueNewUrls]);
       }
@@ -45,14 +69,35 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     setUrlInput('');
   };
 
-  // Local File Upload logic (Base64 conversion)
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  // Process files (with size validation <= 250 KB)
+  const processFiles = async (files: FileList | File[]) => {
+    setError(null);
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    const validFiles: File[] = [];
+    const oversizedFiles: string[] = [];
+
+    for (const file of fileArray) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        const sizeInKB = (file.size / 1024).toFixed(1);
+        oversizedFiles.push(`${file.name} (${sizeInKB} KB)`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (oversizedFiles.length > 0) {
+      setError(`Image size must not exceed 250 KB. The following image(s) exceed the limit and were rejected:\n${oversizedFiles.join(', ')}`);
+    }
+
+    if (validFiles.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setUploading(true);
 
-    // Helper to read file as DataURL (Base64)
     const readFile = (file: File): Promise<string> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -63,12 +108,10 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     };
 
     try {
-      // Process all files in parallel using Promise.all
       const base64Results = await Promise.all(
-        Array.from(files).map(file => readFile(file))
+        validFiles.map(file => readFile(file))
       );
 
-      // Filter out duplicate base64 strings
       const uniqueNewUrls = base64Results.filter(base64 => !images.includes(base64));
 
       if (uniqueNewUrls.length > 0) {
@@ -76,9 +119,38 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
       }
     } catch (err) {
       console.error('Error loading image files:', err);
+      setError('Failed to process image files.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  // Local File Upload logic (Base64 conversion)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
     }
   };
 
@@ -95,11 +167,27 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
         <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Product Images catalog</h4>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs animate-fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="flex-1 font-medium whitespace-pre-line">{error}</div>
+          <button 
+            type="button" 
+            onClick={() => setError(null)} 
+            className="text-red-500 hover:text-red-700 dark:hover:text-red-300 font-bold ml-1 cursor-pointer"
+            title="Dismiss error"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Tabs Selector */}
       <div className="flex border-b border-zinc-200 dark:border-zinc-800/80 p-0.5 bg-zinc-100/50 dark:bg-zinc-900/50 rounded-lg w-fit">
         <button
           type="button"
-          onClick={() => setActiveTab('link')}
+          onClick={() => { setActiveTab('link'); setError(null); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'link'
               ? 'bg-background text-foreground shadow-sm'
@@ -111,7 +199,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
         </button>
         <button
           type="button"
-          onClick={() => setActiveTab('upload')}
+          onClick={() => { setActiveTab('upload'); setError(null); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'upload'
               ? 'bg-background text-foreground shadow-sm'
@@ -157,7 +245,14 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
           
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="h-28 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-background/50 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors group"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`h-28 rounded-lg border-2 border-dashed transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer group ${
+              isDragging 
+                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20' 
+                : 'border-zinc-300 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-background/50'
+            }`}
           >
             {uploading ? (
               <>
@@ -168,8 +263,8 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
               <>
                 <Upload className="w-6 h-6 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
                 <div className="flex flex-col items-center text-center">
-                  <span className="text-xs font-semibold text-foreground">Click to browse your device files</span>
-                  <span className="text-[10px] text-zinc-500 mt-0.5">Supports PNG, JPG, WebP. Select multiple items.</span>
+                  <span className="text-xs font-semibold text-foreground">Click or drag & drop image files</span>
+                  <span className="text-[10px] text-zinc-500 mt-0.5">Supports PNG, JPG, WebP. <strong>Max size: 250 KB per file.</strong></span>
                 </div>
               </>
             )}

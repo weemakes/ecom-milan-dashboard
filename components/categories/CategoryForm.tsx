@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProductCategory, Vendor } from '@/lib/seedData';
-import { Image as ImageIcon, Upload } from 'lucide-react';
+import { Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
 
 interface CategoryFormProps {
   category?: ProductCategory | null;
   categoriesList: ProductCategory[];
   vendorsList: Vendor[];
-  onSubmit: (formData: any) => void;
+  onSubmit: (formData: any) => Promise<void> | void;
   onCancel: () => void;
 }
 
@@ -26,6 +26,7 @@ export default function CategoryForm({
   const [vendorId, setVendorId] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (category) {
@@ -49,6 +50,12 @@ export default function CategoryForm({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 250 * 1024) {
+        setError(`Image file size must not exceed 250 KB. Selected file is ${(file.size / 1024).toFixed(1)} KB.`);
+        if (e.target) e.target.value = '';
+        return;
+      }
+      setError('');
       const reader = new FileReader();
       reader.onloadend = () => {
         setImgUrl(reader.result as string);
@@ -63,21 +70,28 @@ export default function CategoryForm({
     return c.id !== category.id;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!name.trim()) return setError('Category name is required.');
     if (!imgUrl.trim()) return setError('Category image URL is required.');
 
-    onSubmit({
-      category_name: name.trim(),
-      category_description: description.trim() || null,
-      category_img: imgUrl.trim(),
-      parent_category_id: parentId === '' ? null : parentId,
-      vendor_id: vendorId === '' ? null : vendorId,
-      is_active: isActive,
-    });
+    setSubmitting(true);
+    try {
+      await onSubmit({
+        category_name: name.trim(),
+        category_description: description.trim() || null,
+        category_img: imgUrl.trim(),
+        parent_category_id: parentId === '' ? null : parentId,
+        vendor_id: vendorId === '' ? null : vendorId,
+        is_active: isActive,
+      });
+    } catch (err: any) {
+      setError(err?.message || 'Failed to submit category form.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -230,15 +244,22 @@ export default function CategoryForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm font-semibold transition-colors cursor-pointer"
+          disabled={submitting}
+          className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50 text-sm font-semibold transition-colors cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md shadow-indigo-600/10 transition-colors cursor-pointer"
+          disabled={submitting}
+          className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-600/70 disabled:cursor-not-allowed text-white text-sm font-semibold shadow-md shadow-indigo-600/10 transition-colors flex items-center gap-2 cursor-pointer"
         >
-          {category ? 'Save Changes' : 'Create Category'}
+          {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          <span>
+            {submitting 
+              ? (category ? 'Saving Changes...' : 'Creating Category...') 
+              : (category ? 'Save Changes' : 'Create Category')}
+          </span>
         </button>
       </div>
     </form>
