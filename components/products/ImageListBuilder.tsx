@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { 
-  Plus, 
-  Trash2, 
-  Image as ImageIcon, 
-  Link as LinkIcon, 
-  Upload, 
+import {
+  Plus,
+  Trash2,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Upload,
   Loader2,
   AlertCircle
 } from 'lucide-react';
@@ -16,7 +16,7 @@ interface ImageListBuilderProps {
   onChange: (images: string[]) => void;
 }
 
-const MAX_FILE_SIZE_BYTES = 250 * 1024; // 250 KB limit
+const MAX_FILE_SIZE_BYTES = 600 * 1024; // 600 KB limit
 
 export default function ImageListBuilder({ images, onChange }: ImageListBuilderProps) {
   const [activeTab, setActiveTab] = useState<'link' | 'upload'>('link');
@@ -56,7 +56,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     }
 
     if (oversizedBase64.length > 0) {
-      setError(`Image size must not exceed 250 KB. Rejected: ${oversizedBase64.join(', ')}`);
+      setError(`Image size must not exceed 600 KB. Rejected: ${oversizedBase64.join(', ')}`);
     }
 
     if (validUrls.length > 0) {
@@ -65,11 +65,11 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
         onChange([...images, ...uniqueNewUrls]);
       }
     }
-    
+
     setUrlInput('');
   };
 
-  // Process files (with size validation <= 250 KB)
+  // Process files (with size validation <= 600 KB)
   const processFiles = async (files: FileList | File[]) => {
     setError(null);
     const fileArray = Array.from(files);
@@ -88,7 +88,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     }
 
     if (oversizedFiles.length > 0) {
-      setError(`Image size must not exceed 250 KB. The following image(s) exceed the limit and were rejected:\n${oversizedFiles.join(', ')}`);
+      setError(`Image size must not exceed 600 KB. The following image(s) exceed the limit and were rejected:\n${oversizedFiles.join(', ')}`);
     }
 
     if (validFiles.length === 0) {
@@ -160,7 +160,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
 
   return (
     <div className="flex flex-col gap-4 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 select-none">
-      
+
       {/* Title */}
       <div className="flex items-center gap-2 pb-1 border-b border-zinc-200 dark:border-zinc-800/80">
         <ImageIcon className="w-4 h-4 text-indigo-500" />
@@ -172,9 +172,9 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
         <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs animate-fade-in">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="flex-1 font-medium whitespace-pre-line">{error}</div>
-          <button 
-            type="button" 
-            onClick={() => setError(null)} 
+          <button
+            type="button"
+            onClick={() => setError(null)}
             className="text-red-500 hover:text-red-700 dark:hover:text-red-300 font-bold ml-1 cursor-pointer"
             title="Dismiss error"
           >
@@ -188,11 +188,10 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
         <button
           type="button"
           onClick={() => { setActiveTab('link'); setError(null); }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-            activeTab === 'link'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeTab === 'link'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-zinc-500 hover:text-foreground'
-          }`}
+            }`}
         >
           <LinkIcon className="w-3.5 h-3.5" />
           <span>Paste Link(s)</span>
@@ -200,11 +199,10 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
         <button
           type="button"
           onClick={() => { setActiveTab('upload'); setError(null); }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-            activeTab === 'upload'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeTab === 'upload'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-zinc-500 hover:text-foreground'
-          }`}
+            }`}
         >
           <Upload className="w-3.5 h-3.5" />
           <span>Product Upload Image</span>
@@ -242,17 +240,16 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
             accept="image/*"
             className="hidden"
           />
-          
+
           <div
             onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`h-28 rounded-lg border-2 border-dashed transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer group ${
-              isDragging 
-                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20' 
+            className={`h-28 rounded-lg border-2 border-dashed transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer group ${isDragging
+                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20'
                 : 'border-zinc-300 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-background/50'
-            }`}
+              }`}
           >
             {uploading ? (
               <>
@@ -264,7 +261,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
                 <Upload className="w-6 h-6 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
                 <div className="flex flex-col items-center text-center">
                   <span className="text-xs font-semibold text-foreground">Click or drag & drop image files</span>
-                  <span className="text-[10px] text-zinc-500 mt-0.5">Supports PNG, JPG, WebP. <strong>Max size: 250 KB per file.</strong></span>
+                  <span className="text-[10px] text-zinc-500 mt-0.5">Supports PNG, JPG, WebP. <strong>Max size: 600 KB per file.</strong></span>
                 </div>
               </>
             )}
@@ -278,8 +275,8 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
           <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Selected / Cataloged Images ({images.length})</span>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
             {images.map((img, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className="group relative h-20 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-background overflow-hidden flex items-center justify-center shadow-sm"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

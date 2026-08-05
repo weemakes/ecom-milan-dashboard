@@ -50,8 +50,8 @@ export default function CategoryForm({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 250 * 1024) {
-        setError(`Image file size must not exceed 250 KB. Selected file is ${(file.size / 1024).toFixed(1)} KB.`);
+      if (file.size > 500 * 1024) {
+        setError(`Image file size must not exceed 500 KB. Selected file is ${(file.size / 1024).toFixed(1)} KB.`);
         if (e.target) e.target.value = '';
         return;
       }
@@ -104,7 +104,7 @@ export default function CategoryForm({
 
       {/* Grid for Inputs and Image Preview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
+
         {/* Forms Inputs */}
         <div className="md:col-span-2 flex flex-col gap-4">
           {/* Category Name */}
@@ -227,14 +227,12 @@ export default function CategoryForm({
         <button
           type="button"
           onClick={() => setIsActive(!isActive)}
-          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            isActive ? 'bg-indigo-600' : 'bg-zinc-300 dark:bg-zinc-700'
-          }`}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? 'bg-indigo-600' : 'bg-zinc-300 dark:bg-zinc-700'
+            }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-              isActive ? 'translate-x-5' : 'translate-x-0'
-            }`}
+            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? 'translate-x-5' : 'translate-x-0'
+              }`}
           />
         </button>
       </div>
@@ -256,8 +254,8 @@ export default function CategoryForm({
         >
           {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
           <span>
-            {submitting 
-              ? (category ? 'Saving Changes...' : 'Creating Category...') 
+            {submitting
+              ? (category ? 'Saving Changes...' : 'Creating Category...')
               : (category ? 'Save Changes' : 'Create Category')}
           </span>
         </button>

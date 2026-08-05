@@ -290,8 +290,8 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 250 * 1024) {
-        onToast(`Image size must not exceed 250 KB (${(file.size / 1024).toFixed(1)} KB)`, 'error');
+      if (file.size > 500 * 1024) {
+        onToast(`Image size must not exceed 500 KB (${(file.size / 1024).toFixed(1)} KB)`, 'error');
         if (e.target) e.target.value = '';
         return;
       }
