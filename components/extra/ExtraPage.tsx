@@ -383,7 +383,7 @@ function OccasionsTab({ onToast }: { onToast: (msg: string, type: 'success' | 'e
       const currentVal = prod?.occasion || '';
       const parts = currentVal.split(',').map(s => s.trim()).filter(Boolean);
       const filtered = parts.filter(x => x !== selectedOccasion);
-      const newValue = filtered.length > 0 ? filtered.join(', ') : null;
+      const newValue = filtered.length > 0 ? filtered.join(', ') : '';
 
       await patchProductCampaign(id, { occasion: newValue });
       setOccasionProducts(p => p.filter(x => x.id !== id));
