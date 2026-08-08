@@ -50,8 +50,8 @@ export default function CategoryForm({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 500 * 1024) {
-        setError(`Image file size must not exceed 500 KB. Selected file is ${(file.size / 1024).toFixed(1)} KB.`);
+      if (file.size > 400 * 1024) {
+        setError(`Image file size must not exceed 400 KB. Selected file is ${(file.size / 1024).toFixed(1)} KB.`);
         if (e.target) e.target.value = '';
         return;
       }

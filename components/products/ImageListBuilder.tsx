@@ -16,7 +16,7 @@ interface ImageListBuilderProps {
   onChange: (images: string[]) => void;
 }
 
-const MAX_FILE_SIZE_BYTES = 600 * 1024; // 600 KB limit
+const MAX_FILE_SIZE_BYTES = 400 * 1024; // 400 KB limit
 
 export default function ImageListBuilder({ images, onChange }: ImageListBuilderProps) {
   const [activeTab, setActiveTab] = useState<'link' | 'upload'>('link');
@@ -56,7 +56,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     }
 
     if (oversizedBase64.length > 0) {
-      setError(`Image size must not exceed 600 KB. Rejected: ${oversizedBase64.join(', ')}`);
+      setError(`Image size must not exceed 400 KB. Rejected: ${oversizedBase64.join(', ')}`);
     }
 
     if (validUrls.length > 0) {
@@ -69,7 +69,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     setUrlInput('');
   };
 
-  // Process files (with size validation <= 600 KB)
+  // Process files (with size validation <= 400 KB)
   const processFiles = async (files: FileList | File[]) => {
     setError(null);
     const fileArray = Array.from(files);
@@ -88,7 +88,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
     }
 
     if (oversizedFiles.length > 0) {
-      setError(`Image size must not exceed 600 KB. The following image(s) exceed the limit and were rejected:\n${oversizedFiles.join(', ')}`);
+      setError(`Image size must not exceed 400 KB. The following image(s) exceed the limit and were rejected:\n${oversizedFiles.join(', ')}`);
     }
 
     if (validFiles.length === 0) {
@@ -261,7 +261,7 @@ export default function ImageListBuilder({ images, onChange }: ImageListBuilderP
                 <Upload className="w-6 h-6 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
                 <div className="flex flex-col items-center text-center">
                   <span className="text-xs font-semibold text-foreground">Click or drag & drop image files</span>
-                  <span className="text-[10px] text-zinc-500 mt-0.5">Supports PNG, JPG, WebP. <strong>Max size: 600 KB per file.</strong></span>
+                  <span className="text-[10px] text-zinc-500 mt-0.5">Supports PNG, JPG, WebP. <strong>Max size: 400 KB per file.</strong></span>
                 </div>
               </>
             )}

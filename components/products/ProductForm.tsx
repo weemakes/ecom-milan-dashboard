@@ -42,63 +42,77 @@ export default function ProductForm({
     if (val && discount) {
       const p = parseFloat(val);
       const d = parseFloat(discount);
-      if (!isNaN(p) && !isNaN(d)) {
+      if (!isNaN(p) && !isNaN(d) && p > 0 && d > 0) {
         const finalDisc = Math.round(p - (p * d) / 100);
         setDiscountedPrice(finalDisc.toString());
       }
     } else if (val && discountedPrice) {
       const p = parseFloat(val);
       const dp = parseFloat(discountedPrice);
-      if (!isNaN(p) && !isNaN(dp) && p > 0) {
+      if (!isNaN(p) && !isNaN(dp) && p > 0 && dp < p) {
         const pct = Math.round(((p - dp) / p) * 100);
-        setDiscount(pct.toString());
+        setDiscount(pct > 0 ? pct.toString() : '');
       }
     }
   };
 
   const handleDiscountChange = (val: string) => {
     setDiscount(val);
-    if (price && val) {
+    if (price && val !== '') {
       const p = parseFloat(price);
       const d = parseFloat(val);
       if (!isNaN(p) && !isNaN(d)) {
-        const finalDisc = Math.round(p - (p * d) / 100);
-        setDiscountedPrice(finalDisc.toString());
+        if (d <= 0) {
+          setDiscountedPrice('');
+        } else {
+          const finalDisc = Math.round(p - (p * d) / 100);
+          setDiscountedPrice(finalDisc.toString());
+        }
       }
-    } else if (!val) {
+    } else if (val === '') {
       setDiscountedPrice('');
     }
   };
 
   const handleDiscountedPriceChange = (val: string) => {
     setDiscountedPrice(val);
-    if (price && val) {
+    if (price && val !== '') {
       const p = parseFloat(price);
       const dp = parseFloat(val);
-      if (!isNaN(p) && !isNaN(dp) && p > 0) {
+      if (!isNaN(p) && !isNaN(dp) && p > 0 && dp < p) {
         const pct = Math.round(((p - dp) / p) * 100);
-        setDiscount(pct.toString());
+        setDiscount(pct > 0 ? pct.toString() : '');
+      } else {
+        setDiscount('');
       }
-    } else if (!val) {
+    } else if (val === '') {
       setDiscount('');
     }
   };
 
   useEffect(() => {
     if (product) {
-      setName(product.product_name);
-      setCategoryId(product.category_id);
-      setVendorId(product.vendor_id);
+      setName(product.product_name || '');
+      setCategoryId(product.category_id || '');
+      setVendorId(product.vendor_id || '');
       setDescription(product.description || '');
-      setPrice(product.price.toString());
-      setDiscountedPrice(product.discounted_price ? product.discounted_price.toString() : '');
-      if (product.price && product.discounted_price) {
-        const pct = Math.round(((product.price - product.discounted_price) / product.price) * 100);
-        setDiscount(pct.toString());
+
+      const pVal = product.price !== undefined && product.price !== null ? parseFloat(product.price as any) : 0;
+      const dpVal = product.discounted_price !== undefined && product.discounted_price !== null && product.discounted_price !== ''
+        ? parseFloat(product.discounted_price as any)
+        : null;
+
+      setPrice(pVal > 0 ? pVal.toString() : (product.price ? product.price.toString() : ''));
+      setDiscountedPrice(dpVal !== null && !isNaN(dpVal) ? dpVal.toString() : '');
+
+      if (pVal > 0 && dpVal !== null && !isNaN(dpVal) && dpVal > 0 && dpVal < pVal) {
+        const pct = Math.round(((pVal - dpVal) / pVal) * 100);
+        setDiscount(pct > 0 ? pct.toString() : '');
       } else {
         setDiscount('');
       }
-      setQty(product.quantity_in_stock.toString());
+
+      setQty(product.quantity_in_stock !== undefined && product.quantity_in_stock !== null ? product.quantity_in_stock.toString() : '0');
       setSku(product.sku || '');
       setImages(product.images || []);
       let parsedVariants = [];
@@ -114,8 +128,8 @@ export default function ProductForm({
         }
       }
       setVariants(parsedVariants);
-      setIsActive(product.is_active);
-      setIsFeatured(product.is_featured);
+      setIsActive(product.is_active !== undefined ? product.is_active : true);
+      setIsFeatured(product.is_featured !== undefined ? product.is_featured : false);
     } else {
       setName('');
       setCategoryId('');
@@ -148,6 +162,11 @@ export default function ProductForm({
     }
     if (parseInt(qty) < 0) return setError('Stock quantity cannot be negative.');
 
+    const parsedPrice = parseFloat(price);
+    const parsedDiscountedPrice = discountedPrice && discountedPrice.trim() !== '' && !isNaN(parseFloat(discountedPrice))
+      ? parseFloat(discountedPrice)
+      : null;
+
     setSubmitting(true);
     try {
       await onSubmit({
@@ -155,13 +174,10 @@ export default function ProductForm({
         category_id: categoryId,
         vendor_id: vendorId,
         description: description.trim() || null,
-        price: parseFloat(price),
-        discounted_price: discountedPrice ? parseFloat(discountedPrice) : null,
+        price: parsedPrice,
+        discounted_price: parsedDiscountedPrice,
         quantity_in_stock: parseInt(qty),
         sku: sku.trim() || null,
-        occasion: null,
-        landing_section: null,
-        featured_type: null,
         images,
         variants,
         is_active: isActive,
