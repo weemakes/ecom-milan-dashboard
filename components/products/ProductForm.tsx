@@ -98,9 +98,14 @@ export default function ProductForm({
       setDescription(product.description || '');
 
       const pVal = product.price !== undefined && product.price !== null ? parseFloat(product.price as any) : 0;
-      const dpVal = product.discounted_price !== undefined && product.discounted_price !== null && product.discounted_price !== ''
-        ? parseFloat(product.discounted_price as any)
-        : null;
+      // const dpVal = product.discounted_price !== undefined && product.discounted_price !== null && product.discounted_price !== ''
+      //   ? parseFloat(product.discounted_price as any)
+      //   : null;
+
+      const dpVal =
+  product.discounted_price !== undefined && product.discounted_price !== null
+    ? Number(product.discounted_price)
+    : null;
 
       setPrice(pVal > 0 ? pVal.toString() : (product.price ? product.price.toString() : ''));
       setDiscountedPrice(dpVal !== null && !isNaN(dpVal) ? dpVal.toString() : '');
