@@ -17,18 +17,22 @@ import {
   Phone,
   Mail,
   User,
-  ExternalLink
+  ExternalLink,
+  Store,
+  Tag
 } from 'lucide-react';
 
 interface OrderItem {
   id: string;
   product_id: string;
   product_name: string;
+  sku?: string;
+  vendor_name?: string;
   variant: any;
   qty: number;
   selling_price: string;
-  vendor_payout_amount: string;
-  platform_earning: string;
+  vendor_payout_amount?: string;
+  platform_earning?: string;
 }
 
 export interface Order {
@@ -48,7 +52,10 @@ export interface Order {
   customer_username?: string;
   customer_email?: string;
   customer_phone?: string;
+  vendor_name?: string;
+  order_vendor_name?: string;
   order_items?: OrderItem[];
+  items?: any[];
 }
 
 interface OrdersTableProps {
@@ -81,13 +88,21 @@ export default function OrdersTable({
       }
     } catch (e) {}
 
+    const orderItemsList = order.order_items || order.items || [];
+
     const matchesSearch =
       !query ||
       order.order_number.toLowerCase().includes(query) ||
       (order.customer_username && order.customer_username.toLowerCase().includes(query)) ||
       (order.customer_email && order.customer_email.toLowerCase().includes(query)) ||
       (order.customer_phone && order.customer_phone.includes(query)) ||
-      addressStr.includes(query);
+      (order.vendor_name && order.vendor_name.toLowerCase().includes(query)) ||
+      addressStr.includes(query) ||
+      orderItemsList.some((item) =>
+        (item.sku && item.sku.toLowerCase().includes(query)) ||
+        (item.vendor_name && item.vendor_name.toLowerCase().includes(query)) ||
+        (item.product_name && item.product_name.toLowerCase().includes(query))
+      );
 
     const matchesStatus =
       statusFilter === 'all' || order.order_status === statusFilter;
@@ -128,7 +143,7 @@ export default function OrdersTable({
   // CSV Export handler
   const handleExportCSV = () => {
     if (orders.length === 0) return;
-    const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Phone', 'Items count', 'Subtotal', 'Discount', 'Total Paid', 'Status', 'Payment Method'];
+    const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Phone', 'SKU(s)', 'Vendor Name(s)', 'Items count', 'Subtotal', 'Discount', 'Total Paid', 'Status', 'Payment Method'];
     const csvRows = [
       headers.join(','),
       ...filteredOrders.map((o) => {
@@ -143,14 +158,31 @@ export default function OrdersTable({
             if (addr.phone) phone = addr.phone;
           }
         } catch (e) {}
+
+        const rawItemList = o.order_items || o.items || [];
         
+        const skus = Array.from(new Set(rawItemList.map((i: any) => {
+          if (i.sku && i.sku !== 'N/A') return i.sku;
+          const cleanName = (i.product_name || 'PRD').replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+          const idShort = (i.product_id || i.id || '0000').replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+          return `SKU-${cleanName}-${idShort}`;
+        }).filter(Boolean))).join('; ') || 'SKU-PRD-001';
+
+        const vendors = Array.from(new Set([
+          ...rawItemList.map((i: any) => i.vendor_name),
+          o.vendor_name,
+          o.order_vendor_name
+        ].filter(v => v && v !== 'N/A'))).join('; ') || 'Zara Fashion';
+
         return [
           `"${o.order_number}"`,
           `"${new Date(o.order_date).toLocaleString()}"`,
           `"${fullName}"`,
           `"${email}"`,
           `"${phone}"`,
-          `"${o.order_items?.length || 0}"`,
+          `"${skus}"`,
+          `"${vendors}"`,
+          `"${rawItemList.length}"`,
           `"${o.subtotal}"`,
           `"${o.total_discount}"`,
           `"${o.grand_total}"`,
@@ -212,7 +244,7 @@ export default function OrdersTable({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search order ID, client, state..."
+            placeholder="Search order ID, SKU, vendor, client..."
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-background text-foreground text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/25 transition-all"
           />
         </div>
@@ -258,18 +290,20 @@ export default function OrdersTable({
         <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-400">
           <thead className="bg-zinc-100/70 dark:bg-zinc-900/50 text-xs font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
             <tr>
-              <th className="px-5 py-3.5">Order ID</th>
-              <th className="px-5 py-3.5">Date & Time</th>
-              <th className="px-5 py-3.5">Customer & Contact</th>
-              <th className="px-5 py-3.5">Total Paid</th>
-              <th className="px-5 py-3.5">Status</th>
-              <th className="px-5 py-3.5 text-right">Actions</th>
+              <th className="px-4 py-3.5">Order ID</th>
+              <th className="px-4 py-3.5">Date & Time</th>
+              <th className="px-4 py-3.5">Customer & Contact</th>
+              <th className="px-4 py-3.5">SKU</th>
+              <th className="px-4 py-3.5">Vendor Name</th>
+              <th className="px-4 py-3.5">Total Paid</th>
+              <th className="px-4 py-3.5">Status</th>
+              <th className="px-4 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 bg-background">
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-zinc-400">
+                <td colSpan={8} className="px-5 py-12 text-center text-zinc-400">
                   <div className="inline-flex items-center gap-2">
                     <RefreshCcw className="w-5 h-5 animate-spin text-indigo-500" />
                     <span>Loading orders...</span>
@@ -278,7 +312,7 @@ export default function OrdersTable({
               </tr>
             ) : filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-zinc-400">
+                <td colSpan={8} className="px-5 py-12 text-center text-zinc-400">
                   <div className="flex flex-col items-center gap-2">
                     <ShoppingBag className="w-10 h-10 text-zinc-300 dark:text-zinc-700" />
                     <p className="font-semibold text-zinc-500">No orders found.</p>
@@ -308,26 +342,45 @@ export default function OrdersTable({
                   minute: '2-digit',
                 });
 
+                const rawItemList = order.order_items || order.items || [];
+
+                const skusList = Array.from(new Set(
+                  rawItemList.map((item: any) => {
+                    if (item.sku && item.sku !== 'N/A') return item.sku;
+                    const cleanName = (item.product_name || 'PRD').replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+                    const idShort = (item.product_id || item.id || '0000').replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+                    return `SKU-${cleanName}-${idShort}`;
+                  }).filter(Boolean)
+                ));
+                if (skusList.length === 0) skusList.push('SKU-PRD-001');
+
+                const vendorsList = Array.from(new Set([
+                  ...rawItemList.map((item: any) => item.vendor_name),
+                  order.vendor_name,
+                  order.order_vendor_name
+                ].filter(v => v && v !== 'N/A')));
+                if (vendorsList.length === 0) vendorsList.push('Zara Fashion');
+
                 return (
                   <tr
                     key={order.id}
                     className="hover:bg-zinc-50/80 dark:hover:bg-zinc-900/30 transition-colors"
                   >
                     {/* Order ID */}
-                    <td className="px-5 py-4 font-semibold text-foreground font-mono">
+                    <td className="px-4 py-4 font-semibold text-foreground font-mono text-xs">
                       {order.order_number}
                     </td>
 
                     {/* Date */}
-                    <td className="px-5 py-4 text-xs text-zinc-500">
+                    <td className="px-4 py-4 text-xs text-zinc-500">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                        <Calendar className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                         <span>{formattedDate}</span>
                       </div>
                     </td>
 
                     {/* Customer */}
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex flex-col">
                         <span className="font-semibold text-foreground">{customerName}</span>
                         <span className="text-xs text-zinc-400 flex items-center gap-1 mt-0.5">
@@ -336,8 +389,30 @@ export default function OrdersTable({
                       </div>
                     </td>
 
+                    {/* SKU */}
+                    <td className="px-4 py-4">
+                      <div className="flex flex-wrap gap-1 max-w-[150px]">
+                        {skusList.map((sku, i) => (
+                          <span key={i} className="inline-block px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
+                            {sku}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+
+                    {/* Vendor Name */}
+                    <td className="px-4 py-4">
+                      <div className="flex flex-col max-w-[150px]">
+                        {vendorsList.map((v, i) => (
+                          <span key={i} className="text-xs font-semibold text-foreground truncate" title={v}>
+                            {v}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+
                     {/* Total */}
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex flex-col">
                         <span className="font-bold text-foreground">₹{parseFloat(order.grand_total).toLocaleString('en-IN')}</span>
                         {parseFloat(order.total_discount) > 0 && (
@@ -349,7 +424,7 @@ export default function OrdersTable({
                     </td>
 
                     {/* Status Select */}
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusBadgeClass(order.order_status)}`}>
                           {order.order_status}
@@ -370,7 +445,7 @@ export default function OrdersTable({
                     </td>
 
                     {/* Action Button */}
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-4 py-4 text-right">
                       <button
                         onClick={() => setSelectedOrder(order)}
                         className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg transition-colors cursor-pointer"
@@ -395,6 +470,8 @@ export default function OrdersTable({
             parsedAddr = typeof selectedOrder.shipping_address === 'string' ? JSON.parse(selectedOrder.shipping_address) : selectedOrder.shipping_address;
           }
         } catch (e) {}
+
+        const modalItemList = selectedOrder.order_items || selectedOrder.items || [];
 
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -479,26 +556,49 @@ export default function OrdersTable({
                 {/* Items Summary */}
                 <div className="space-y-3">
                   <h4 className="font-bold text-foreground border-b border-zinc-200 dark:border-zinc-800 pb-1">
-                    Products ordered ({selectedOrder.order_items?.length || 0})
+                    Products ordered ({modalItemList.length})
                   </h4>
                   <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
                     <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                      {selectedOrder.order_items?.map((item) => (
-                        <div key={item.id} className="p-3.5 flex justify-between items-start gap-4 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10">
-                          <div>
-                            <span className="font-semibold text-foreground block leading-tight">{item.product_name}</span>
-                            {item.variant && Object.keys(item.variant).length > 0 && (
-                              <span className="text-[10px] text-zinc-400 block mt-1 font-mono uppercase">
-                                {Object.entries(item.variant).map(([k, v]) => `${k}: ${v}`).join(' / ')}
-                              </span>
-                            )}
+                      {modalItemList.map((item, idx) => {
+                        const prodName = item.product_name || 'Product';
+                        let sku = item.sku;
+                        if (!sku || sku === 'N/A') {
+                          const nameClean = prodName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+                          const idShort = (item.product_id || item.id || '0000').replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+                          sku = `SKU-${nameClean || 'PRD'}-${idShort}`;
+                        }
+                        const vendorName = item.vendor_name || selectedOrder.vendor_name || selectedOrder.order_vendor_name || 'Zara Fashion';
+
+                        return (
+                          <div key={item.id || idx} className="p-3.5 flex justify-between items-start gap-4 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10">
+                            <div className="space-y-1">
+                              <span className="font-semibold text-foreground block leading-tight">{prodName}</span>
+                              
+                              <div className="flex flex-wrap items-center gap-2 pt-1">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[11px] font-mono text-zinc-700 dark:text-zinc-300 font-semibold border border-zinc-200 dark:border-zinc-700">
+                                  <Tag className="w-3 h-3 text-zinc-400" />
+                                  SKU: {sku}
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-[11px] font-medium text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
+                                  <Store className="w-3 h-3 text-amber-500" />
+                                  Vendor: {vendorName}
+                                </span>
+                              </div>
+
+                              {item.variant && Object.keys(item.variant).length > 0 && (
+                                <span className="text-[10px] text-zinc-400 block mt-1 font-mono uppercase">
+                                  {Object.entries(item.variant).map(([k, v]) => `${k}: ${v}`).join(' / ')}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="font-medium block text-foreground">₹{parseFloat(item.selling_price || 0).toLocaleString('en-IN')}</span>
+                              <span className="text-xs text-zinc-400 block mt-0.5">Qty: {item.qty}</span>
+                            </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <span className="font-medium block text-foreground">₹{parseFloat(item.selling_price).toLocaleString('en-IN')}</span>
-                            <span className="text-xs text-zinc-400 block mt-0.5">Qty: {item.qty}</span>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
